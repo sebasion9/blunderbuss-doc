@@ -11,3 +11,6 @@ ref
 *.run.xml
 *.synctex.gz
 *.toc
+*.bib
+*.bbl
+*.blg

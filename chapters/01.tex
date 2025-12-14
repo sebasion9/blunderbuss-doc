@@ -1,12 +1,21 @@
 \chapter{Wstęp}
 \label{ch:wstep}
+Początki programowania komputerów sięgają lat 40. XX wieku, kiedy pierwsze maszyny cyfrowe, takie jak ENIAC, były programowane bezpośrednio w kodzie maszynowym \cite{bib:the-computer-from-pascal-to-von-neumann}. Odbywało się to za pomocą ręcznie obsługiwanych przełączników i kabli, gdzie instrukcje i liczby wprowadzano krok po kroku \cite{bib:eniac}. Błędy w takiej technice programowania lub zmiana samego programu zajmowała bardzo dużo czasu \cite{bib:eniac}. Aby ułatwić programowanie, powstały pierwsze języki wysokiego poziomu, takie jak Fortran (1957 r.) \cite{bib:programming-languages-history} czy LISP (1958 r.) \cite{bib:programming-languages-history}, które umożliwiały tworzenie bardziej złożonych programów w sposób łatwiejszy do zrozumienia i utrzymania. Równocześnie rozwijano pierwsze kompilatory, które tłumaczyły instrukcje wysokiego poziomu na kod maszynowy. Pierwszym z nich był kompilator A-0 System (1952 r.) opracowany przez Grace Hopper, przeznaczony dla komputera ogólnego przeznaczenia UNIVAC I. Pierwszym komercyjnym kompilatorem języka wysokiego poziomu był Fortran I (1957 r.) opracowany przez IBM.
 
-\begin{itemize}
-\item wprowadzenie w problem/zagadnienie
-\item osadzenie problemu w dziedzinie
-\item cel pracy
-\item zakres pracy
-\item zwięzła charakterystyka rozdziałów
-\item jednoznaczne określenie wkładu autora, w przypadku prac wieloosobowych – tabela z autorstwem poszczególnych elementów pracy
-\end{itemize}
+W dzisiejszych czasach języki programowania oraz kompilatory są bardzo rozwinięte i oferują znacznie więcej możliwości. Współczesne języki programowania zapewniają wysoki poziom abstrakcji, który umożliwia programowanie nie tylko specjalistom, ale także programistom z małym doświadczeniem. Z kolei nowoczesne kompilatory nie ograniczają się jedynie do tłumaczenia kodu źródłowego na kod maszynowy, lecz wykonują też zaawansowane analizy statyczne oraz liczne optymalizacje, mające na celu poprawę wydajności, bezpieczeństwa i niezawodności programów \cite{bib:engineering-a-compiler}.
 
+Jedną z ważniejszych cech kompilatora jest optymalizacja kodu wynikowego pod względem zajmowanej pamięci programu oraz jego czasu wykonywania. Optymalizacja odbywa się za pomocą różnych technik takich jak: usuwanie martwego kodu, propagacja stałych wartości, eliminacja zbędnych obliczeń, upraszczanie wyrażeń, rozwijanie pętli. Szczególną i nieczęsto spotykaną techniką optymalizacyjną jest memoizacja \cite{bib:haskell-memoization} - zapamiętywanie wyników deterministycznych funkcji na podstawie podanych argumentów, a następnie przy ponownych wywołaniach funkcji odczytywane są wyniki z pamięci zamiast ponownego wywoływania instrukcji. Technika ta pozwala znacząco ograniczyć liczbę wykonywanych instrukcji, co w określonych przypadkach prowadzi do istotnej poprawy kosztem dodatkowego zużycia pamięci.
+
+Celem tej pracy jest zaprojektowanie i zaimplementowanie języka programowania oraz kompilatora, które umożliwiają programistom wykorzystanie techniki memoizacji na etapie kompilacji, zapewniając programistom kontrolę nad momentem i zakresem jej zastosowania. Zaprojektowany język programowania umożliwia również korzystanie z funkcji dostarczanych przez dołączone biblioteki języka C, co umożliwia integrację z szerokim ekosystemem C, bez konieczności ponownej implementacji bibliotek.
+
+Praca obejmuje realizację projektu, architekturę kompilatora, zaprojektowaną składnię oraz semantykę języka. Przeprowadzono również testy optymalizacyjne mechanizmu memoizacji. Dodatkowo przeanalizowano istniejące rozwiązania memoizacji we współczesnych językach. Praca składa się z siedmiu rozdziałów:
+
+\begin{enumerate}
+    \item Rozdział \ref{ch:wstep} przedstawia zagadnienie, opisując jego historyczny kontekst oraz ogólne założenia projektowe.
+    \item Analiza literatury i podobne rozwiązania znajdują się w Rozdziale \ref{ch:02}.
+    \item W Rozdziale \ref{ch:wymagania-i-narzedzia} opisane są wykorzystane narzędzia zewnętrzne i technologie zastosowane w projekcie.
+    \item Rozdział \ref{ch:04} przedstawia wymagania sprzętowe, oprogramowania oraz opisuję, jak korzystać z programu.
+    \item W Rozdziale \ref{ch:05} opisana jest struktura projektu, organizacja kodu, współdziałanie modułów oraz typowy przepływ programu.
+    \item Rozdział \ref{ch:06} zawiera weryfikację wymagań oraz przeprowadzone ogólne testy oprogramowania. Dodatkowo w tym rozdziale przeprowadzono testy programu wygenerowanego przez kompilator.
+    \item Podsumowanie pracy oraz plany na przyszłość znajdują się w Rozdziale \ref{ch:07}.
+\end{enumerate}
