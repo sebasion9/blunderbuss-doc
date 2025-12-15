@@ -1,47 +1,55 @@
 \chapter{Analiza tematu}
 \label{ch:02}
+Projektowanie oraz implementacja kompilatora wymaga zrozumienia jego podstawowych etapów przetwarzania programu źródłowego na kod wynikowy. Typowy kompilator składa się z kilku kroków, z których każdy pełni określoną funkcję w procesie kompilacji. Celem kompilatora jest zapewnienie, że sens kodu źródłowego jest w jak największym stopniu zachowany w momencie uruchomienia kodu wynikowego.
 
-\textbf{sformułowanie problemu}
 
-\section{Badania literatury}
+\section{Badania literaturowe}
+Kompilatory języków programowania posiadają bogatą historię, a wiele schematów i technik opracowanych w przeszłości jest stosowanych także współcześnie. Ich ewolucja obejmuje zarówno rozwój etapów przetwarzania programu - takich jak analiza leksykalna, parser, analiza semantyczna i generacja kodu wynikowego - jak i wprowadzenie nowoczesnych mechanizmów optymalizacyjnych, w tym memoizacji funkcji czystych.
 
-\textbf{studia literaturowe \cite{bib:artykul,bib:ksiazka,bib:konferencja,bib:internet} -  opis znanych rozwiązań (także opisanych naukowo, jeżeli problem jest poruszany w publikacjach naukowych), algorytmów}
+\subsection{Analiza leksykalna i parser}
+Analiza leksykalna to pierwszy etap kompilatora, który polega na podzieleniu kodu źródłowego na najmniejsze jednostki składniowe (tokeny) - takie jak identyfikatory, liczby, operatory czy słowa kluczowe. Tokenizacja znacznie upraszcza dalsze przetwarzanie kodu oraz wykrywa potencjalne błędy leksykalne takie jak: niepoprawne identyfikatory, niepoprawne literały, nieznane symbole.
 
-\subsection{Literatura 1}
-\subsection{Literatura 2}
-\subsection{Literatura 3}
-\subsection{Literatura 4}
-\subsection{Literatura 5}
+Ciąg tokenów następnie jest przekazywany do parsera - ten weryfikuje poprawność składniową programu oraz buduje drzewo składniowe (AST - Abstract Syntax Tree) \cite{bib:antlr}. Analiza leksykalna oraz parser mogą zostać przeprowadzone w oparciu o gramatyki formalne, co znacznie upraszcza implementację kompilatora. Gramatyki formalne w \cite{bib:antlr} są definiowane za pomocą składni bazowanej na notacji EBNF (Extended Backus-Naur Form). Przykładowa gramatyka formalna akceptowana przez narzędzie ANTLR w wersji 4:
+
+\begin{lstlisting}
+grammar SimpleExpr;
+
+expr: expr '+' INT
+    | INT
+    ;
+INT : [0-9]+ ;
+WS  : [ \t\r\n]+ -> skip ;
+\end{lstlisting}
+
+\subsection{Analiza semantyczna i generacja kodu wynikowego}
+Kolejnym etapem kompilacji jest analiza semantyczna, która polega na analizie drzewa składniowego (AST). Podczas tego kroku weryfikowane są reguły języka dotyczące typów danych, zakresów zmiennych, wywołań funkcji czy spójności programu \cite{bib:engineering-a-compiler}. Podczas tego procesu układana jest struktura programu, ustalane są zakresy zmiennych, sprawdzane odwołania do zdefiniowanych i niezdefiniowanych identyfikatorów oraz analizowane wyrażenia.
+
+Analiza semantyczna również wykrywa błędy, których nie da się wykryć podczas poprzednich etapów kompilacji, między innymi: błędy typów danych - niezgodność przypisania wyrażenia do zdefiniowanej zmiennej o innym typie, odwołania do zmiennych niezdefiniowanych lub poza zakresem, wywoływanie funkcji z niewłaściwą liczbą argumentów lub niewłaściwym typem argumentu.
+
+Etap analizy semantycznej często jest łączony z etapem generacji kodu wynikowego, który generuje instrukcje zrozumiałe dla maszyny na podstawie struktury programu \cite{bib:writing-c-compiler}. Instrukcje i ich format są zależne od docelowej platformy, na którą kod wynikowy jest generowany.
 
 \section{Podobne rozwiązania}
+Technika optymalizacyjna memoizacji funkcji jest stosowana w współczesnych językach programowania i kompilatorach. Poniższe rozwiązania korzystają z tej optymalizacji w różny sposób, jednak większość z nich korzysta z zewnętrznych lub standardowych bibliotek.
 
-\textbf{studia literaturowe \cite{bib:artykul,bib:ksiazka,bib:konferencja,bib:internet} -  opis znanych rozwiązań (także opisanych naukowo, jeżeli problem jest poruszany w publikacjach naukowych), algorytmów}
+\subsection{Clojure}
+Clojure jest dynamicznym językiem programowania ogólnego przeznaczenia stanowiącym dialekt języka Lisp, który wspiera paradygmat programowania funkcyjnego oraz współbieżnego. Język ten został opracowany przez Richa Hickeya \cite{bib:clojure}, między innymi oferuje on wbudowane w język słowo kluczowe \textbf{memoize}, które zwraca nową funkcje, zapamiętującą wyniki wywołań dla danych argumentów. Mechanizm ten działa w czasie wykonywania programu i jest użyteczny w kontekscie programowania funkcyjnego.
+\subsection{Python}
+Python to interpretowany język programowania wysokiego poziomu ogólnego przeznaczenia posiadający rozbudowany pakiet bibliotek standardowych. Język ten został stworzony przez Guido van Rossum, a jego pierwsze wydanie ukazało się w 1991 roku. W standardowej bibliotece języka Python dostępny jest mechanizm memoizacji w postaci dekoratora \textbf{@functools.cache} - w tym kontekscie dekorator traktowany jest jako rozszerzenie funkcji, dodając do niej mechanizm pamięci podręcznej. Mechanizm \textbf{@functools.cache} działa w czasie wykonywania programu i jest przystosowany do pracy w środowisku wielowątkowym, a zastosowana pamięć podręczna jest bezpieczna wątkowo (thread-safe).
+\subsection{Memoizacja na poziomie programu}
+Alternatywą dla mechanizmów memoizacji wbudowanych w język lub dostępnych w standardowej bibliotece, jest implementacja tej techniki optymalizacji bezpośrednio w programie docelowym. To rozwiązanie jest szczególnie efektywne w językach wspierających programowanie funkcyjne, gdzie funkcje czyste zapewniają brak efektów ubocznych, co gwarantuje poprawność zapamiętywanych wyników. Wadą takiego rozwiązania jest przeniesienie odpowiedzialności za zarządzanie pamięcią zapamiętywanych wyników na programistę. Pseudokod memoizacji naiwnej rekurencyjnej funkcji obliczającej n-ty element ciągu Fibonacciego:
+\begin{lstlisting}
+let cache = {};
 
-\subsection{Podobne rozwiązanie 1}
-\subsection{Podobne rozwiązanie 2}
-\subsection{Podobne rozwiązanie 3}
-
-%
-%
-% Wzory  
-% \begin{align}
-% y = \frac{\partial x}{\partial t}
-% \end{align}
-% jak i pojedyncze symbole $x$ i $y$  składa się w trybie matematycznym.
-
-
-%\begin{Definition}\label{def:1}
-%Definicja to zdanie (lub układ zdań) odpowiadające na pytanie o strukturze „co to jest a?”. Definicja normalna jest zdaniem złożonym z 2 członów: definiowanego (łac. definiendum) i definiującego (łac. definiens), połączonych spójnikiem definicyjnym („jest to”, „to tyle, co” itp.). 
-%\end{Definition}
-%
-%\begin{Theorem}[Pitagorasa]\label{t:pitagoras}
-%W dowolnym trójkącie prostokątnym suma kwadratów długości przyprostokątnych jest równa kwadratowi długości przeciwprostokątnej tego trójkąta. 
-%\end{Theorem}
-%
-%\begin{Example}[generalizacja]\label{ex:generalizacja}
-%Przykładem generalizacji jest para: zwierzę i pies. Pies jest zwierzęciem. Pies jest uszczegółowieniem pojęcia zwierzę. Zwierzę jest uogólnieniem pojęcia pies.
-%\end{Example}
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-
+function fib(n) {
+    if (n in cache) return cache[n];
+    let result;
+    if (n < 2) {
+        result = n;
+    } else {
+        result = fib(n - 1) + fib(n - 2);
+    }
+    cache[n] = result;
+    return result;
+}
+\end{lstlisting}
 
