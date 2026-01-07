@@ -6,33 +6,111 @@ Projektowanie oraz implementacja kompilatora wymaga zrozumienia jego podstawowyc
 \section{Badania literaturowe}
 Kompilatory języków programowania posiadają bogatą historię, a wiele schematów i technik opracowanych w przeszłości jest stosowanych także współcześnie. Ich ewolucja obejmuje zarówno rozwój etapów przetwarzania programu - takich jak analiza leksykalna, parser, analiza semantyczna i generacja kodu wynikowego - jak i wprowadzenie nowoczesnych mechanizmów optymalizacyjnych, w tym memoizacji funkcji czystych.
 
-\subsection{Analiza leksykalna i parser}
-Analiza leksykalna to pierwszy etap kompilatora, który polega na podzieleniu kodu źródłowego na najmniejsze jednostki składniowe (tokeny) - takie jak identyfikatory, liczby, operatory czy słowa kluczowe. Tokenizacja znacznie upraszcza dalsze przetwarzanie kodu oraz wykrywa potencjalne błędy leksykalne takie jak: niepoprawne identyfikatory, niepoprawne literały, nieznane symbole.
+\subsection{Analiza leksykalna i analiza składniowa}
 
-Ciąg tokenów następnie jest przekazywany do parsera - ten weryfikuje poprawność składniową programu oraz buduje drzewo składniowe (AST - Abstract Syntax Tree) \cite{bib:antlr}. Analiza leksykalna oraz parser mogą zostać przeprowadzone w oparciu o gramatyki formalne, co znacznie upraszcza implementację kompilatora. Gramatyki formalne w \cite{bib:antlr} są definiowane za pomocą składni bazowanej na notacji EBNF (Extended Backus-Naur Form). Przykładowa gramatyka formalna akceptowana przez narzędzie ANTLR w wersji 4:
+Analize leksykalną oraz analizę składniową często są przeprowadzone w oparciu o gramatyki formalne, skutkując znacznym uproszczeniem implementacji kompilatora. Gramatyki formalne \cite{bib:automata-theory-langs-and-computation} to zdefiniowany sposób opisywania języków formalnych, czyli zbiorów poprawnych ciągów symboli nad danym alfabetem. Gramatyki określają jakie konstrukcje są dozwolone i według jakich reguł mogą być tworzone, niezależnie od ich znaczenia. Są wykorzystywane między innymi w opisie protokołów komunikacyjnych, języków zapytań, formatów plików, teorii automatów lub jak w tym przypadku, w budowie kompilatorów i analizie języków programowania. Gramatyki formalne w \cite{bib:antlr} są definiowane za pomocą składni opierającej się na notacji EBNF (Extended Backus-Naur Form). Wszystkie poniższe przykłady przytoczone w tym punkcie są reprezentowane gramatykami formalnymi akceptowanymi przez narzędzie ANTLR w wersji 4.
 
-\begin{lstlisting}
-grammar SimpleExpr;
+Analiza leksykalna (tokenizacja) to pierwszy etap kompilatora, który polega na podzieleniu kodu źródłowego na najmniejsze jednostki składniowe (tokeny) - takie jak identyfikatory, liczby, operatory czy słowa kluczowe. Tokenizacja znacznie upraszcza dalsze przetwarzanie kodu oraz wykrywa potencjalne błędy leksykalne takie jak: niepoprawne identyfikatory, niepoprawne literały, nieznane symbole. Przykładowe wyrażenie przetwarzane przez lekser i gramatyka formalna:
 
-expr: expr '+' INT
-    | INT
-    ;
-INT : [0-9]+ ;
-WS  : [ \t\r\n]+ -> skip ;
+
+\begin{lstlisting}[caption={Wyrażenie - tokenizacja}, label={lst:tokenization-expr}]
+Dzisiaj jest 12 maja
 \end{lstlisting}
 
+
+\begin{lstlisting}[caption={Gramatyka formalna - tokenizacja}, label={lst:tokenization-grammar}]
+grammar LexerTest;
+
+start   : (ID | NUMBER)+ ;
+
+NUMBER  : [0-9]+ ;
+ID      : [a-zA-Z]+ ;
+WS      : [ \t\r\n]+ -> skip ;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Wynik tokenizacji}, label={lst:tokenization-out}]
+1. "Dzisiaj"   <ID>     0:6 
+2. "jest"      <ID>     8:11 
+3. "12"        <NUMBER> 13:14 
+4. "maja"      <ID>     16:19
+5. "<EOF>"     <EOF>    21:20
+\end{lstlisting}
+Gramatyka formalna zawarta w listingu \ref{lst:tokenization-grammar} definuje trzy reguły leksykalne: 
+
+\begin{enumerate}
+\item[NUMBER] - ciąg znaków uznawany jest za ten token gdy wszystkie znaki są liczbami naturalnymi i jest to conajmniej jeden znak. W wyrażeniu zawartym w listingu \ref{lst:tokenization-expr} poprawnym numerem jest "12".
+\item[ID] - reguła leksykalna odpowiedzialna za ciągi znaków zawierających tylko znaki A-Z (nie zwracając na wielkość liter). W listingu \ref{lst:tokenization-out} są to elementy pod indeksami 1,2 i 4.
+\item[WS] - jest to specjalna reguła, która ignoruje w tym przypadku znaki białe (space, tab, carriage return, newline). 
+\end{enumerate}
+Następnym etapem jest analiza składniowa (parser) - w tym etapie, na podstawie przekazanego przez lekser ciągu tokenów, sprawdzana jest poprawność składni programu oraz budowane jest drzewo składniowe (Abstract Syntax Tree, dalej AST)\cite{bib:ast-how-far-are-we}. Przykład analizy leksykalnej połączonej z parserem na podstawie wyrażenia arytmetycznego:
+
+\begin{lstlisting}[caption={Przykładowe wyrażenie arytmetyczne}, label={lst:aritm-expr}]
+a + 3 * (b + 3)
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Reguły leksykalne}, label={lst:aritm-tokens}]
+NUMBER : [0-9]+ ;
+ID     : [a-zA-Z_][a-zA-Z_0-9]* ;
+PLUS   : '+' ;
+MUL    : '*' ;
+LPAREN : '(' ;
+RPAREN : ')' ;
+WS     : [ \t\r\n]+ -> skip ;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Reguły parsera}, label={lst:aritm-parser}]
+expr
+    : expr PLUS expr
+    | expr MUL expr
+    | LPAREN expr RPAREN
+    | NUMBER
+    | ID
+    ;
+\end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{graf/antlr4_aritm_expr.pdf}
+    \caption{Wygenerowane drzewo składniowe}
+    \label{fig:aritm-ast}
+\end{figure}
+
 \subsection{Analiza semantyczna i generacja kodu wynikowego}
-Kolejnym etapem kompilacji jest analiza semantyczna, która polega na analizie drzewa składniowego (AST). Podczas tego kroku weryfikowane są reguły języka dotyczące typów danych, zakresów zmiennych, wywołań funkcji czy spójności programu \cite{bib:engineering-a-compiler}. Podczas tego procesu układana jest struktura programu, ustalane są zakresy zmiennych, sprawdzane odwołania do zdefiniowanych i niezdefiniowanych identyfikatorów oraz analizowane wyrażenia.
+Kolejnym etapem kompilacji jest analiza semantyczna, która polega na analizie drzewa składniowego (AST). Podczas tego kroku weryfikowane są reguły języka dotyczące typów danych, zakresów zmiennych, wywołań funkcji czy spójności programu \cite{bib:engineering-a-compiler}. Podczas tego procesu układana jest struktura programu, ustalane są zakresy zmiennych, sprawdzane odwołania do zdefiniowanych i niezdefiniowanych identyfikatorów oraz analizowane wyrażenia. Analize można przeprowadzić za pomocą wizytorów (visitors) lub listenerów. Wizytory pozwalają na rekurencyjne odwiedzanie węzłów drzewa składniowego i wykonywanie akcji semantycznych w punktach odpowiadających konkretnym regułom parsera. Listenery natomiast działają na zasadzie reakcji na wejście lub wyjście z węzłów drzewa - parser wykonuję odpowiednie metody listenera w momencie rozpoznania danej reguły parsera. Przykładowa analiza AST w postaci pseudokodu przeprowadzona została za pomocą wizytorów (rozwiązanie wykorzystane w implementacji projektu) na podstawie rysynku \ref{fig:aritm-ast}.
+
+\begin{lstlisting}[caption={Analiza semantyczna rysunku \ref{fig:aritm-ast}}, label={lst:sem-analysis}]
+Visit(tree)
+
+if tree.all_expr == 2 and tree.PLUS != null {
+    return Visit(tree.expr(0)) + Visit(tree.expr(1))
+}
+
+if tree.NUMBER != null {
+    return parse_num(tree.NUMBER.text)
+}
+
+if tree.ID != null {
+    return variables[tree.ID.text]
+}
+
+\end{lstlisting}
+Rekurencyjna funkcja odwiedzająca w listingu \ref{lst:sem-analysis} obsługuję dodawanie liczb, za pomocą reguły parsera \textbf{expr} (zdefiniowanej w regułach parsera \ref{lst:aritm-parser}).
 
 Analiza semantyczna również wykrywa błędy, których nie da się wykryć podczas poprzednich etapów kompilacji, między innymi: błędy typów danych - niezgodność przypisania wyrażenia do zdefiniowanej zmiennej o innym typie, odwołania do zmiennych niezdefiniowanych lub poza zakresem, wywoływanie funkcji z niewłaściwą liczbą argumentów lub niewłaściwym typem argumentu.
 
 Etap analizy semantycznej często jest łączony z etapem generacji kodu wynikowego, który generuje instrukcje zrozumiałe dla maszyny na podstawie struktury programu \cite{bib:writing-c-compiler}. Instrukcje i ich format są zależne od docelowej platformy, na którą kod wynikowy jest generowany.
 
 \section{Podobne rozwiązania}
-Technika optymalizacyjna memoizacji funkcji jest stosowana w współczesnych językach programowania i kompilatorach. Poniższe rozwiązania korzystają z tej optymalizacji w różny sposób, jednak większość z nich korzysta z zewnętrznych lub standardowych bibliotek.
+Technika optymalizacyjna memoizacji funkcji jest stosowana we współczesnych językach programowania i kompilatorach. Poniższe rozwiązania korzystają z tej optymalizacji w różny sposób, jednak większość z nich używa zewnętrznych lub standardowych bibliotek. 
+
+Technika ta często wiązana jest z programowaniem funkcyjnym \cite{bib:haskell-functional-programming}, czyli paradygmatem, w którym podstawową jednostką konstrukcji programu są funkcje, a nie sekwencje instrukcji wpływających na stan. W programowaniu funkcyjnym nacisk kładzie się na wyrażanie obliczeń poprzez funkcje i ich kompozycję, a dane zwykle traktowane są jako niemodyfikowalne.
+
+Efekty uboczne w kontekście funckji to działania lub wyrażenia, które zmieniają stan programu lub jego otoczenie poza zwracanym wynikiem. Przykładami efektów ubocznych może być modyfikacja zmiennej globalnej, zapis do pliku, wypisywanie na ekranie lub wysyłanie zapytania sieciowego.
+
+Funkcję których wynik zależy wyłącznie od jej argumentów i nie posiadają efektów ubocznych, nazywane są funkcjami czystymi. Oznacza to, że dla tych samych wartości wejściowych zawszę zwracany będzie ten sam wynik.
 
 \subsection{Clojure}
-Clojure jest dynamicznym językiem programowania ogólnego przeznaczenia stanowiącym dialekt języka Lisp, który wspiera paradygmat programowania funkcyjnego oraz współbieżnego. Język ten został opracowany przez Richa Hickeya \cite{bib:clojure}, między innymi oferuje on wbudowane w język słowo kluczowe \textbf{memoize}, które zwraca nową funkcje, zapamiętującą wyniki wywołań dla danych argumentów. Mechanizm ten działa w czasie wykonywania programu i jest użyteczny w kontekscie programowania funkcyjnego.
+Clojure jest dynamicznym językiem programowania ogólnego przeznaczenia stanowiącym dialekt języka LISP, który wspiera paradygmat programowania funkcyjnego oraz współbieżnego. Język ten został opracowany przez Richa Hickeya \cite{bib:clojure}, między innymi oferuje on wbudowane w język słowo kluczowe \textbf{memoize}, które zwraca nową funkcje, zapamiętującą wyniki wywołań dla danych argumentów. Mechanizm ten działa w czasie wykonywania programu i jest użyteczny w kontekscie programowania funkcyjnego.
 \subsection{Python}
 Python to interpretowany język programowania wysokiego poziomu ogólnego przeznaczenia posiadający rozbudowany pakiet bibliotek standardowych. Język ten został stworzony przez Guido van Rossum, a jego pierwsze wydanie ukazało się w 1991 roku. W standardowej bibliotece języka Python dostępny jest mechanizm memoizacji w postaci dekoratora \textbf{@functools.cache} - w tym kontekscie dekorator traktowany jest jako rozszerzenie funkcji, dodając do niej mechanizm pamięci podręcznej. Mechanizm \textbf{@functools.cache} działa w czasie wykonywania programu i jest przystosowany do pracy w środowisku wielowątkowym, a zastosowana pamięć podręczna jest bezpieczna wątkowo (thread-safe).
 \subsection{Memoizacja na poziomie programu}
