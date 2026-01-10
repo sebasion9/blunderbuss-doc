@@ -9,7 +9,7 @@ Wymagania funkcyjne opisują funkcjonalności dostępne w języku programowania,
 
 \subsection{Definiowanie zmiennych}
 
-Programista musi być w stanie definiować zmienne, aby następnie je wykorzystywać w kolejnych krokach programu. Nazwy tworzonych zmiennych w języku powinny zaczynać się od litery (małej lub dużej), a następnie mogą pojawić się litery, cyfry lub znak \verb|_|. Nazwy zmiennych można opisać wyrażeniem regularnym \verb|[a-zA-Z][a-zA-Z0-9_]*|. Zdefiniować zmienną można tylko raz w danym zakresie (eng. \textit{scope}). Definiowana zmienna musi być opisana typem i istnieje możliwość natychmiastowo przypisać do zmiennej wartość.
+Programista musi być w stanie definiować zmienne, aby następnie je wykorzystywać w kolejnych krokach programu. Nazwy tworzonych zmiennych w języku powinny zaczynać się od litery (małej lub dużej), a następnie mogą pojawić się litery, cyfry lub znak \verb|_|. Nazwy zmiennych można opisać wyrażeniem regularnym \verb|[a-zA-Z][a-zA-Z0-9_]*|. Zdefiniować zmienną można tylko raz w danym zakresie (eng. \textit{scope}). Definiowana zmienna musi być opisana typem i istnieje możliwość natychmiastowego przypisania wartości do zmiennej.
 
 \subsection{Deklarowanie funkcji zewnętrznych}
 
@@ -21,7 +21,7 @@ Użytkownik musi mieć możliwość dołączenia plików nagłówkowych zawieraj
 
 \subsection{Definiowanie funkcji i wywoływanie funkcji}
 
-Programista musi mieć możliwość zdefiniowania funkcji. Wymagane jest zdefiniowanie funkcji \verb|main|, która jest startową funkcją każdego programu. Definicja funkcji musi zawierać zwracany typ, listę argumentów, identyfikator (nazwa musi spełniać takie same wymagania jak zmienna) oraz blok zawierający instrukcję, które są wykonywane przy wywołaniu funkcji. Programista musi być w stanie wywołać wszystkie zdeklarowane i dołączone funkcje.
+Programista musi mieć możliwość zdefiniowania funkcji. Wymagane jest zdefiniowanie funkcji \verb|main|, która jest startową funkcją każdego programu. Definicja funkcji musi zawierać zwracany typ, listę argumentów, identyfikator (nazwa musi spełniać takie same wymagania jak zmienna) oraz blok zawierający instrukcje, które są wykonywane przy wywołaniu funkcji. Programista musi być w stanie wywołać wszystkie zdeklarowane i dołączone funkcje.
 
 \subsection{Możliwość memoizacji funkcji czystych}
 
@@ -41,17 +41,17 @@ Użytkownik musi mieć możliwość komentowania kodu, dostępne są komentarze 
 
 \subsection{Obsługa funkcji rekurencyjnych}
 
-Użytkownik musi mieć możliwość definiowania funkcji które wywołują same siebie (rekurencja).
+Użytkownik musi mieć możliwość definiowania funkcji, które wywołują same siebie (rekurencja).
 
 \subsection{Ograniczona obsługa podstawowych typów}
 
 Programista musi mieć możliwość korzystania z kilku podstawowych typów:
 
 \begin{itemize}
-    \item[int] - 64 bitowa liczba całkowita.
+    \item[int] - 64-bitowa liczba całkowita.
     \item[str] - łańcuch znaków, wskaźnik do łańcucha znaków
-    \item[ptr] - 64 bitowy ogólny typ wskaźnikowy
-    \item[any] - zwrotny typ wykorzystywany w delaracjach funkcji
+    \item[ptr] - 64-bitowy ogólny typ wskaźnikowy
+    \item[any] - zwrotny typ wykorzystywany w deklaracjach funkcji
 \end{itemize}
 \subsection{Możliwość dołączania zewnętrznych bibliotek C}
 
@@ -60,7 +60,7 @@ Programista musi mieć możliwość dołączania zewnętrznych bibliotek C, na p
 
 \section{Wymagania niefunkcjonalne}
 
-Wymaganie niefunkcyjne opisują w jaki sposób kompilator lub język programowania ma działać od strony jakościowej i implementacyjnej.
+Wymagania niefunkcjonalne opisują w jaki sposób kompilator lub język programowania ma działać od strony jakościowej i implementacyjnej.
 
 \subsection{Konwencja wywołań i zarządzanie stosem}
 
@@ -76,7 +76,7 @@ Kompilator powinien zarządzać zapisywaniem wyników funkcji czystych. Odbywa s
 
 \subsection{Czytelność błędów}
 
-Kompilator powinien informować programiste za pomocą czytelnych błędów kompilacyjncyh i odpowiednio przerywać proces na różnych etapach kompilacji (lekser, parser, analiza semantyczna).
+Kompilator powinien informować programiste za pomocą czytelnych błędów kompilacyjnych oraz odpowiednio przerywać proces na różnych etapach kompilacji (lekser, parser, analiza semantyczna).
 
 \subsection{Czytelność składni}
 
@@ -88,21 +88,78 @@ Wynikowy program jest ograniczony systemem operacyjnym i architekturą procesora
 
 
 \section{Narzędzia}
+
+Do zaimplementowania projektu skorzystano z wielu publicznych, open-source narzędzi idealnie dopasowanych do wymagań projektu.
+
 \subsection{Narzędzia głowne}
+
+Implementacja kompilatora opiera się na zestawie podstawowych, powszechnie stosowanych narzędzi środowiska programistycznego.
+
 \subsubsection{ANTLR} % metody eksperymentalne, rozwijanie gramatyk, 04 -> generacja api antlera do .go
-\subsubsection{go} % biblioteki?
-\subsubsection{C} % kontekscie pisania bibliotek do bbuss
+
+ANTLR jest wyjątkowo rozbudowanym i elastycznym narzędziem do parsowania języków formalnych \cite{bib:antlr}. Implementowany projekt odnosił korzyści z ANTLR w kontekście parsowania kodu źródłowego we wszystkich etapach kompilacji: analiza leksykalna (tokenizacja) i analiza składniowa (parser), a następnie odwiedzanie węzłów drzewa składniowego (analiza semantyczna). Jedną z największych zalet ANTLR jest generacja interfejsu programistycznego (dalej API\footnote{API (Application Programming Interface) - interfejs programistyczny umożliwiający komunikację oraz współdziałanie pomiędzy różnymi komponentami oprogramowania lub systemami informatycznymi}) w jednym z dostępnych języków a wygenerowany kod jest optymalny i stabilny. ANTLR domyślnie generuje kod parsera w języku Java. Jednak docelowy język można zmienić za pomocą parametru \verb|-Dlanguage|, który pozwala na wygenerowanie kodu w innym obsługiwanym języku, na przykład \verb|Go|. Przykładowe prototypowania za pomocą ANTLR (na przykładowej gramatyce "Arithm") wygląda następująco:
+
+\begin{lstlisting}[caption={Prototypowanie za pomocą ANTLR}, label={lst:antlr-prot}]
+antlr4 Arithm.g4
+javac Arithm*.java
+grun Arithm expr -gui test.txt
+\end{lstlisting}
+
+Pierwsze dwa polecenia w \ref{lst:antlr-prot} generują i kompilują klasy w języku Java, natomiast ostatnie polecenie jest odpowiedzialne za parsowanie pliku wejściowego oraz wyświetlenie drzewa AST za pomocą interfejsu graficznego (porównanie \ref{fig:aritm-ast}). Tworzenie składni implementowanego języka w dużym stopniu opierało się na prototypowaniu za pomocą ANTLR.
+
+W przypadku projektu, kod parsera do języka \verb|Go| (a precyzyjniej API parsera) generowany jest za pomocą polecenia:
+
+\begin{lstlisting}[caption={Generowanie API parsera w docelowym języku programowania Go}, label={lst:antlr-go}]
+antlr4 -Dlanguage=Go -visitor -package parsing -o /path/to/parser Blunderbuss.g4
+\end{lstlisting}
+
+Polecenie \ref{lst:antlr-go} generuje kod parsera jako moduł (\verb|-package parsing| w języku Go (\verb|-Dlanguage=Go|) na podstawie gramatyki zawartej w \verb|Blunderbuss.g4|.
+
+\subsubsection{Go}
+
+Język Go (zwany też Golang) to nowoczesny, kompilowany język opracowany przez Google\footnote{Google LLC- amerykańska firma technologiczna, znana przede wszystkim jako twórca wyszukiwarki Google, a także jako producent systemu Android}. Autorzy języka opisują go jako wyrazisty, zwięzły, przejrzysty i wydajny, łącząc zalety języków niskopoziomowych (jak C) z nowoczesnymi mechanizmami wysokopoziomowymi \cite{bib:go-docs}. Kompilator implementowanego języka zarówno jak i jego standardowa biblioteka zostały w całości zaimplementowane w języku Go.
+
+\subsubsection{C}
+
+Język C \cite{bib:c} jest językiem programowania niskiego poziomu, który łączy wydajność charakterystyczną dla assemblera z czytelnością języków wysokiego poziomu. Jest szeroko stosowany do tworzenia systemów operacyjnych, kompilatorów oraz oprogramowania wymagającego bezpośredniego dostępu do sprzętu, a jego składnia stała się fundamentem dla wielu współczesnych języków programowania.
+
+W kontekście projektu, z powodu ograniczeń kompilatora i języka programowania, język C jest wykorzystywany jako narzędzie pomocnicze. Przykładem użycia jest funkcja pomocnicza konstruktora struktury reprezentującej kolor RGB (red, green, blue). Struktura ta jest potrzebna np. w bibliotece graficznej \verb|raylib|.
+
+\begin{lstlisting}[caption={Funkcja pomocnicza w C}, label={lst:c-color}]
+#include "raylib.h"
+
+Color ColorFromInt(int r, int g, int b) {
+    return (Color){ r, g, b, 255 };
+}
+\end{lstlisting}
+
+\subsubsection{NASM}
+
+NASM (Netwide Assembler) to open-source asembler i disasembler dla procesorów o architekturze x86, pozwalający programistom generować pliki obiektowe na podstawie kodu asemblera. 
+
+
 \subsubsection{GCC} % asm -> bin, preprocesor
-\subsubsection{Linux} % jako docelowa platforma programów generowanych przez kompilator
+
+GCC (GNU Compiler Collection) \cite{bib:gcc} to open-source zestaw kompilatorów dla różnych języków programowania, w tym C, C++. Kompilator ten oprócz kompilowania języków, jest w stanie linkować (pol \textit{łączyć}) w celu utworzenia końcowego programu. GCC charakteryzuje się wysoką wydajnością, wsparciem dla standardów językowych oraz optymalizacjami kodu.
+
+GCC to kluczowe narzędzie, niezbędne do przepływu kompilacji implementowanego języka programowania. W kontekście projektu odpowiedzialny jest za preprocesowanie kodu źródłowego a następnie linkowanie z biblioteką standardową oraz glibc.
 
 \subsection{Metody eksperymentalne}
-\subsubsection{nasm}
+
+Podczas wstępnego prototypowania oraz rozwijania kompilatora, wykorzystywane były inne narzędzia niż docelowe. Warto zaznaczyć ten proces, ponieważ pozwalał on na szybkie testowanie pomysłów.
+
 \subsubsection{ld}
 
-\subsection{Narzędzia do rozwóju oprogramowania}
-\subsubsection{Środowisko do edycji kodu źródłowego} 
-% nvim: go debugger, lsp
-% terminal
-% tmux
+\verb|ld| jest standardowym linkerem w systemach Unix/Linux, który odpowiada za linkowanie plików obiektowych oraz bibliotek w końcowy program wykonywalny. W praktyce korzystanie bezpośrednio z ld okazało się problematyczne, ponieważ wymagało ręcznego podawania wszystkich opcji linkowania oraz ścieżek do bibliotek. Alternatywą stało się GCC, które jest wygodniejsze i prostsze do używania.
+
+\subsection{Narzędzia do rozwoju oprogramowania}
+
+Istotnym elementem implementacji, są narzędzia za pomocą których rozwijane jest oprogramowanie, ponieważ w pewnym stopniu wpływają one na proces tworzenia kodu i są jednocześnie ograniczane przez inne narzędzia w ekosystemie.
+
+\subsubsection{Środowisko do edycji kodu źródłowego}
+
+Środowisko do edycji kodu źródłowego projektu opierało się na kilku standardowych narzędziach dostępnych w systemie Linux. Sam system stał się głównym narzędziem pracy, narzuconym przez wymagania kompilacji na tej platformie, dzięki czemu jego użycie stało się naturalnym wyborem. Do edycji kodu źródłowego wykorzystano \verb|nvim| (fork znanego oprogramowania \verb|vim|) posiadający szeroki ekosystem ułatwiający implementację. Przykładem dla języka Go jest LSP (Language Server Protocol): podpowiedzi składni, sprawdzanie błędów oraz nawigacja po definicjach i referencjach, a także debugger pozwalający sprawnie znajdywać i poprawiać błędy w kodzie źródłowym.
+
 \subsubsection{git}
-% kontrola wersji
+
+Git to system kontroli wersji, który pozwala śledzić zmiany w kodzie źródłowym, cofać eksperymenty i bezpiecznie testować nowe funkcje. Natomiast zdalne repozytorium pozwala na rozwój projektu oraz synchronizację na wiele urządzeń.
