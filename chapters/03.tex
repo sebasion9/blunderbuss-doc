@@ -64,7 +64,7 @@ Wymagania niefunkcjonalne opisują w jaki sposób kompilator lub język programo
 
 \subsection{Konwencja wywołań i zarządzanie stosem}
 
-Kompilator powinien stosować konwencję wywołań \verb|cdecl| (ang. \textit{C declaration}) oraz odpowiednio zarządzać ramkami stosu, tak aby na przykład rekurencja poprawnie funkcjonowała.
+Kompilator powinien stosować konwencję wywołań zdefiniowanej w specyfikacji \verb|System V AMD64 ABI| \cite{bib:system-v-amd64-abi} oraz odpowiednio zarządzać ramkami stosu, tak aby na przykład rekurencja poprawnie funkcjonowała.
 
 \subsection{Zarządzanie zakresami zmiennych}
 
@@ -84,8 +84,7 @@ Składnia powinna być czytelna, zrozumiała i nieskomplikowana, tak aby nie zaj
 
 \subsection{Ograniczenia platformowe}
 
-Wynikowy program jest ograniczony systemem operacyjnym i architekturą procesora. Kod wynikowy jest obsługiwany na systemie operacyjnym \verb|Linux| i architekturze procesora \verb|x86|.
-
+Wynikowy program jest ograniczony systemem operacyjnym i architekturą procesora. Kod wynikowy jest obsługiwany na systemie operacyjnym \verb|Linux| i architekturze procesora \verb|x86-64|.
 
 \section{Narzędzia}
 
@@ -97,7 +96,7 @@ Implementacja kompilatora opiera się na zestawie podstawowych, powszechnie stos
 
 \subsubsection{ANTLR} % metody eksperymentalne, rozwijanie gramatyk, 04 -> generacja api antlera do .go
 
-ANTLR jest wyjątkowo rozbudowanym i elastycznym narzędziem do parsowania języków formalnych \cite{bib:antlr}. Implementowany projekt odnosił korzyści z ANTLR w kontekście parsowania kodu źródłowego we wszystkich etapach kompilacji: analiza leksykalna (tokenizacja) i analiza składniowa (parser), a następnie odwiedzanie węzłów drzewa składniowego (analiza semantyczna). Jedną z największych zalet ANTLR jest generacja interfejsu programistycznego (dalej API\footnote{API (Application Programming Interface) - interfejs programistyczny umożliwiający komunikację oraz współdziałanie pomiędzy różnymi komponentami oprogramowania lub systemami informatycznymi}) w jednym z dostępnych języków a wygenerowany kod jest optymalny i stabilny. ANTLR domyślnie generuje kod parsera w języku Java. Jednak docelowy język można zmienić za pomocą parametru \verb|-Dlanguage|, który pozwala na wygenerowanie kodu w innym obsługiwanym języku, na przykład \verb|Go|. Przykładowe prototypowania za pomocą ANTLR (na przykładowej gramatyce "Arithm") wygląda następująco:
+ANTLR (ANother Tool for Language Recognition) jest wyjątkowo rozbudowanym i elastycznym narzędziem do parsowania języków formalnych \cite{bib:antlr}. Implementowany projekt odnosił korzyści z ANTLR w kontekście parsowania kodu źródłowego we wszystkich etapach kompilacji: analiza leksykalna (tokenizacja) i analiza składniowa (parser), a następnie odwiedzanie węzłów drzewa składniowego (analiza semantyczna). Jedną z największych zalet ANTLR jest generacja interfejsu programistycznego (dalej API\footnote{API (Application Programming Interface) - interfejs programistyczny umożliwiający komunikację oraz współdziałanie pomiędzy różnymi komponentami oprogramowania lub systemami informatycznymi}) w jednym z dostępnych języków a wygenerowany kod jest optymalny i stabilny. ANTLR domyślnie generuje kod parsera w języku Java. Jednak docelowy język można zmienić za pomocą parametru \verb|-Dlanguage|, który pozwala na wygenerowanie kodu w innym obsługiwanym języku, na przykład \verb|Go|. Przykładowe prototypowania za pomocą ANTLR (na przykładowej gramatyce "Arithm") wygląda następująco:
 
 \begin{lstlisting}[caption={Prototypowanie za pomocą ANTLR}, label={lst:antlr-prot}]
 antlr4 Arithm.g4
@@ -127,7 +126,6 @@ W kontekście projektu, z powodu ograniczeń kompilatora i języka programowania
 
 \begin{lstlisting}[caption={Funkcja pomocnicza w C}, label={lst:c-color}]
 #include "raylib.h"
-
 Color ColorFromInt(int r, int g, int b) {
     return (Color){ r, g, b, 255 };
 }
@@ -158,7 +156,7 @@ Istotnym elementem implementacji, są narzędzia za pomocą których rozwijane j
 
 \subsubsection{Środowisko do edycji kodu źródłowego}
 
-Środowisko do edycji kodu źródłowego projektu opierało się na kilku standardowych narzędziach dostępnych w systemie Linux. Sam system stał się głównym narzędziem pracy, narzuconym przez wymagania kompilacji na tej platformie, dzięki czemu jego użycie stało się naturalnym wyborem. Do edycji kodu źródłowego wykorzystano \verb|nvim| (fork znanego oprogramowania \verb|vim|) posiadający szeroki ekosystem ułatwiający implementację. Przykładem dla języka Go jest LSP (Language Server Protocol): podpowiedzi składni, sprawdzanie błędów oraz nawigacja po definicjach i referencjach, a także debugger pozwalający sprawnie znajdywać i poprawiać błędy w kodzie źródłowym.
+Środowisko do edycji kodu źródłowego projektu opierało się na kilku standardowych narzędziach dostępnych w systemie Linux. Sam system stał się głównym narzędziem pracy, narzuconym przez wymagania kompilacji na tej platformie, dzięki czemu jego użycie stało się naturalnym wyborem. Do edycji kodu źródłowego wykorzystano \verb|nvim| (odgałęzienie znanego oprogramowania \verb|vim|) posiadający szeroki ekosystem ułatwiający implementację. Przykładem dla języka Go jest LSP (Language Server Protocol): podpowiedzi składni, sprawdzanie błędów oraz nawigacja po definicjach i referencjach, a także debugger pozwalający sprawnie znajdywać i poprawiać błędy w kodzie źródłowym.
 
 \subsubsection{git}
 

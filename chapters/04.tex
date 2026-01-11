@@ -14,14 +14,381 @@
 % \item  scenariusze korzystania z systemu (ilustrowane zrzutami z ekranu lub generowanymi dokumentami)
 % \end{itemize}
 
+Zewnętrzna specyfikacja zawiera cenne informacje dla użytkowników kompilatora i języka programowania. Rozdział ten opisuję dokładnie wymagania do spełnienia aby poprawnie korzystać z kompilatora, instrukcje instalacji, instrukcje obsługi oraz przykłady działania programu.
+
 \section{Wymagania sprzętowe i programowe}
-\subsection{Wymagania sprzętowe}
+
+\subsection{System operacyjny i architektura}
+
+Zaprojektowany kompilator przeznaczony jest do działania w środowisku systemów operacyjnych Linux. Ograniczenie to wynika bezpośrednio z przyjętych założeń implementacyjnych oraz zastosowanych narzędzi, które determinują zarówno architekturę sprzętową jak i konwencje wywołań funkcji. Generowany kod wyjściowy ma postać asemblera dla architektury x86-64, co wyklucza możliwość uruchamiania skompilowanych programów na platformach o innej architekturze procesora, takich jak np. ARM.
+
+Istotnym elementem środowiska docelowego jest zastosowanie linuksowej konwencji wywołań języka C, znanej jako System V AMD64 ABI \cite{bib:system-v-amd64-abi}. Konwencja ta definiuje sposób przekazywania argumentów do funkcji, wykorzystanie rejestrów procesora, organizację stosu oraz zasady zwracania wartości.
+
 \subsection{Wymagania programowe}
-\subsection{System operacyjny}
-\subsection{Instalacja}
-\subsection{Instrukcja obsługi}
-\subsection{Przykłady działania}
-\subsubsection{glibc}
-\subsubsection{Inne biblioteki}
+\label{ch:04-wymagania-programowe}
+
+Poniższe oprogramowanie jest wymagane do prawidłowej instalacji i działania kompilatora.
+\begin{itemize}
+    \item NASM w wersji 3.01 - warto zwrócić uwagę na wersję przy instalacji tego narzędzią za pomocą menadżera pakietów.
+    \item Pakiet build-essentials
+    \item GCC w wersji 15.2.1
+    \item Go w wersji 1.12.5 - w przypadku budowania kompilatora ze źródła, alternatywą jest pobranie wersji skompilowanej z wydania repozytorium.
+    \item Git
+\end{itemize}
+
+Zaleźnie od dystrybucji systemu Linux, narzędzia te można zainstalować za pomocą menadżera pakietów odpowiednio dla każdej dystrybucji, takich jak \verb|apt|, \verb|pacman| czy \verb|dnf|. W przypadku gdy wersja oprogramowania zainstalowanego za pomocą menadżera pakietów się nie zgadza lub jest za niska, zalecanym jest zainstalowanie w oprogramowania w odpowiedniej wersji z innych źródeł.
+
+\section{Instalacja}
+\label{ch:04-instalacja}
+% Ubuntu 22.04 kernel 6.18.3-arch1-1
+% Arch 6.18.3-arch1-1
+Implementacja projektu odbywaa się głównie na systemie Arch Linux o architekturze \verb|x86-64| z jądrem w wersji \verb|6.18.3-arch1-1|. W celu weryfikacji poprawności działania oraz zapewnienie przenośności na inne dystrybucje, instalację przeprowadzono na systemie Ubuntu 22.04 LTS z wersją jądra \verb|6.18.3-arch1-1|. Pełna instalacja odbywa się za pomocą wiersza poleceń oraz zawiera budowanie kompilatora ze źródła. Na repozytorium dostępne są również pliki binarne oraz biblioteki - dostarczone do manualnej konfiguracji.
+
+\begin{enumerate}
+    \raggedright
+    \item Należy zainstalować potrzebne narzędzia oraz pakiety znajdujące się w podrozdziale \ref{ch:04-wymagania-programowe}.
+    \item Sprawdzić wersje zainstalowanych narzędzi, w przypadku niepoprawnej instalacja oraz działanie kompilatora może zakończyć się sukcesem, natomiast nie jest to gwarantowane.
+    \break\verb|nasm -v|
+    \break\verb|gcc -v|
+    \break\verb|go version|
+    \item Przykładowa instalacja na systemie Ubuntu 22.04, w tym przypadku narzędzie \verb|nasm| należy zainstalować ze źródła (\href{https://www.nasm.us/pub/nasm/releasebuilds/3.01/}{url}). \break\verb|apt install build-essential gcc golang git|
+    \item Następnie należy sklonować repozytorium. Wybrać jedno z dwóch adresów repozytorium, oryginalne lub lustro (ang. \textit{mirror}) na platformie GitHub.
+    \break\verb|git clone https://git.franzlla.ng/sebasion/blunderbuss.git|
+    \break\verb|git clone https://github.com/sebasion/blunderbuss.git|
+    \item Przejść do katalogu repozytorium.
+    \break\verb|cd blunderbuss|
+    \item Następnym krokiem jest instalacja, dostarczony jest specjalny skrypt instalujący pozwalający na prostą instalację. Docelowe podkatalogi znajdują się w \verb|/opt|, dlatego potrzebne są uprawnienia administratora.
+    \break\verb|sudo ./install.sh|
+
+        Powyższy skrypt buduję pliki ze źródła, tworzy podkatalogi z odpowiednimi uprawnieniami, a następnie przenosi odpowiednie pliki.
+\begin{lstlisting}[caption={Fragment skryptu instalującego}, label={lst:install-script}]
+PREFIX=${PREFIX:-/opt/bbuss}
+go build -o target/bbuss ./cmd
+go build -buildmode=c-archive -ldflags=-linkmode=external -o target/libstd.a ./lib
+
+install -d "$PREFIX/bin"
+install -d "$PREFIX/lib"
+install -d "$PREFIX/include/bbuss"
+install -m 0755 target/bbuss.bin "$PREFIX/bin/"
+install -m 0644 target/libstd.a "$PREFIX/lib"
+cp bbuss/lib/* "$PREFIX/include/bbuss"
+\end{lstlisting}
+    \item Ostatnim krokiem jest wyeksportowanie zmiennej środowiskowej ścieżki, aby utrwalić zmienną, zaleca się umieszczenie poniższego polecenia w pliku konfiguracyjnym powłoki (np. \verb|~/.bashrc| lub \verb|~/.zshrc|).
+    \break\verb|export PATH=/opt/bbuss/bin:$PATH|
+\end{enumerate}
+
+\section{Instrukcja obsługi}
+
+Ta instrukcja jest przeznaczony dla programistów korzystających z kompilatora oraz języka. W instrukcji omówiono strukturę zainstalowanego kompilatora, proces jego wykorzystania oraz sposób pracy z językiem programowania.
+
+\subsection{Kompilator}
+
+Skrypt instalacyjny tworzy trzy katalogi istotne do korzystania z języka programowania.
+\begin{enumerate}
+    \item Katalog \verb|/opt/bbuss/bin/| jest odpowiedzialny za przechowywanie skompilowanych plików binarnych kompilatora.
+    \item \verb|/opt/bbuss/lib/| powinien zawierać wszystkie niestandardowe oraz zewnętrzne biblioteki, z których użytkownik może skorzystać. Katalog ten jest wstępnie uzupełniony standardową biblioteką języka.
+    \item Katalog \verb|/opt/bbuss/include/bbuss/| powinien zawierać wszystkie pliki nagłówkowe wymagane na etapie preprocesowania oraz kompilacji napisanych programów.
+\end{enumerate}
+
+Uruchamianie kompilatora, tak samo jak instalacja, odbywa się za pomocą wiersza poleceń. Poniżej przedstawiono ogólny przykład korzystania z kompilatora, który obejmuję jego wszystkie funkcjonalności. Zakładając, że użytkownik nadal znajduję się w katalogu repozytorium \verb|blunderbuss| z punktu \ref{ch:04-instalacja}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{graf/git-repo-tree.pdf}
+    \caption{Struktura repozytorium}
+    \label{fig:instr-git-tree}
+\end{figure}
+
+Katalog \verb|bbuss/examples| zawiera przykładowe kody źródłowe programów napisane w języku, z których można skorzystać.
+
+\begin{enumerate}
+    \raggedright
+    \item Kompilacja pliku z kodem źródłowym do kodu asemblera za pomocą kompilatora.
+    \break\verb|bbuss -i bbuss/examples/test.bbuss -o target/test.asm -I /opt/bbuss/include|
+        \begin{itemize}
+            \item Flaga \verb|-i| oczekuję pliku źródłowego programu oraz jest wymagana, w tym przypadku skorzystano z przykładu znajdującym się w katalogu repozytorium (rysunek \ref{fig:instr-git-tree}) \verb|bbuss/examples|.
+            \item \verb|-o| to opcjonalna flaga, wskazująca ścieżke wygenerowanego kodu asemblerowego. Do lokalizacji pliku wyjściowego wykorzystano katalog repozytorium \verb|target|.
+            \item Flaga \verb|-I| jest wymagana i odpowiedzialna za ścieżkę do katalogu z plikami nagłówkowymi. Podczas instalacji, pliki nagłówkowe znajdującę sie w repozytorium zostały zainstalowane w katalogu \verb|/opt/bbuss/include|.
+        \end{itemize}
+    \item Następnym krokiem jest użycie narzędzia \verb|nasm| aby przetworzyć wygenerowany kod asemblera do pliku obiektowego zawierającego kod maszynowy.
+    \break\verb|nasm -f elf64 target/test.asm -o target/test.o|
+    \break Fragment \verb|-f elf64| jest odpowiedzialny za wybór formatu ELF 64-bit, zgodnego z wymaganiami projektu.
+    \item Ostatnim etapem kompilacji jest wykorzystanie \verb|gcc| do złączenia plików zawierających kod maszynowy z bibliotekami.
+    \break\verb|gcc -no-pie target/test.o -L/opt/bbuss/lib -lstd -o target/test|
+        \begin{itemize}
+            \item \verb|-no-pie| to argument przekazywany linkerowi, który powoduje, że wynikowy program nie jest plikiem PIE, lecz tradycjnym plikiem binarnym o stałych adresach w pamięci. PIE (Position Independend Executable) to rodzaj pliku wykonywalnego, który może być załadowany w pamięci pod dowolnym adresem, dzięki temu system operacyjny może stosować mechanizmy bezpieczeństwa, zapobiegając np. atakom typu przepełnienie bufora (ang. \textit{buffer overflow}). 
+            \item Flaga \verb|-L| jest odpowiedzialna za dodanie katalogu \verb|/opt/bbuss/lib| do listy miejsc, w których linker szuka bibliotek.
+            \item \verb|-lstd| a dokładniej \verb|-l<nazwa>| przekazuję linkerowi nazwę biblioteki, którą ma dodatkowo złączyć (oprócz np. domyślnej glibc). Wzorzec szukanych bibliotek wygląda następująco \verb|lib<nazwa>.a| lub \verb|lib<nazwa>.so|. Zainstalowana standardowa biblioteka istnieje w katalogu pod nazwą \verb|libstd.a|.
+            \item Finalnie \verb|-o| wskazuję ścieżke wynikowego programu wykonywalnego.
+        \end{itemize}
+    \item Ostatnim krokiem jest uruchomienie programu wynikowego.
+    \break\verb|./target/test|
+\end{enumerate}
+
+\subsection{Język programowania}
+
+Język programowanie \verb|blunderbuss| jest wzorowany na języku C, dlatego też niektóre fragmenty składni są podobne.
+
+\subsubsection{Pliki nagłówkowe}
+
+Pliki nagłówkowe zawierają deklaracje funkcji bibliotek C (w tym np. glibc) lub biblioteki języka blunderbuss. Funkcje deklarowane są za pomocą słowa kluczowego \verb|extern|, poniżej przykładowe deklaracje.
+
+\begin{lstlisting}[caption={Deklaracje funkcji w pliku nagłówkowym}, label={lst:jp-header}, morekeywords={func, ptr, str}]
+extern func printf(str fmt, any msg) any {}
+extern func rand() int {}
+extern func malloc(int size) ptr {}
+extern func realloc(ptr p, int size) ptr {}
+extern func free(ptr p) ptr {}
+extern func clock() ptr {}
+\end{lstlisting}
+
+Następnie w pliku źródłowym zawierającym program, należy dołączyć pliki nagłowkowe.
+
+\begin{lstlisting}[caption={Dołączanie plików nagłówkowych}, label={lst:jp-header-include}]
+#include <bbuss/std.bbuss>
+#include <bbuss/libc.bbuss>
+\end{lstlisting}
+
+\subsubsection{Definicja i wywołanie funkcji}
+
+Definicja funkcji rozpoczyna się słowem kluczowym \verb|func|. Funkcja zawiera nazwę, zwracany typ, argumenty oraz blok instrukcji wykonywanych podczas wywoływania funkcji. W przypadku zwracania wartości, wykorzystane jest do tego słowo kluczowe \verb|return|. Przykładowa definicja:
+
+\begin{lstlisting}[caption={Definicja funkcji}, label={lst:jp-func}, morekeywords={func, str}]
+func test(int a, str b) int {
+    /* lista instrukcji */
+    return a + 2;
+}
+\end{lstlisting}
+
+Wywołanie funkcji - wykonanie wszystkich instrukcji w ciele funkcji, odbywa się za pomocą składni \verb|test(1, "text")|.
+
+\subsubsection{Instrukcja warunkowa}
+
+Instrukcja warunkowa wykorzystuję trzy słowa kluczowe: \verb|if|, \verb|else| oraz \verb|elseif|. Zawarte warunki w instrukcji warunkowej mogą korzystać z operatorów arytmetycznych i logicznych. Język nie posiada typu "boolean", dlatego liczba "0" jest traktowana jako fałsz, a wszystkie inne jako prawda.
+
+Lista operatorów:
+\begin{itemize}
+    \item \verb|lt| - mniejsze od
+    \item \verb|le| - mniejsze bądź równe
+    \item \verb|gt| - większe od
+    \item \verb|ge| - większe bądź równe
+    \item \verb|eq| - równe
+    \item \verb|ne| - nierówne
+    \item \verb|and| - operator koniunkcji logicznej
+    \item \verb|or| - operator alternatywy logicznej
+    \item \verb|%| - operator reszty z dzielenia (ang. \textit{modulo})
+\end{itemize}
+
+Przykład kodu źródłowego, który wykorzystuję instrukcję warunkowe:
+
+\begin{lstlisting}[caption={Instrukcja warunkowa}, label={lst:jp-if}, morekeywords={elseif, eq}]
+if(prod eq 11) {
+    printf("produkt=11");
+} elseif(prod eq 7) {
+    printf("produkt=7");
+} elseif(prod eq 6) {
+    printf("produkt=6");
+} else {
+    printf("produkt?");
+}
+\end{lstlisting}
+
+\subsubsection{Instrukcja pętli}
+
+Instrukcja pętli rozpoczyna się słowem kluczowym \verb|for| i składa się z: instrukcji inicjalizującej, wyrażenia warunkowego określającego zakończenie pętli, instrukcji wykonywanej po każdej iteracji oraz ciała pętli (bloku instrukcji). Dodatkowo programista może skorzystać z słów kluczowych \verb|next| i \verb|break|, które kolejno powodują natychmiastowe przejście do kolejnej iteracji lub wyjście z pętli.
+
+Przykładowa pętla \verb|for|.
+\begin{lstlisting}[caption={Instrukcja pętli}, label={lst:jp-for}, morekeywords={next, eq, lt, elseif}]
+for(int i = 0; i lt 100; i = i + 1;) {
+    if(i eq 50) {
+        break;
+    } elseif(i % 2) {
+        next;
+    }
+    print(i);
+}
+\end{lstlisting}
+
+\subsubsection{Mechanizm memoizacji}
+
+Mechanizm memoizacji wymaga wstawienia słowa kluczowego \verb|cache| przed definicją funkcji oraz opcjonalnego użycia słowa kluczowego \verb|safe|, aby wykonać ciało funkcji zamiast tylko otrzymać zapisany wynik.
+
+\begin{lstlisting}[caption={Mechanizm memoizacji}, morekeywords={cache, func, safe}, label={lst:jp-memo}]
+cache func test(int a, int b) int {
+    int result;
+    /* inne instrukcje wyliczajace wynik */
+    /* efekty uboczne, np. pisanie do pliku */
+    result = a + b * b;
+    return result;
+}
+
+func main() int {
+    int wynik1 = test(10, 20);
+    int wynik2 = test(10, 20);
+    int wynik3 = safe test(10, 20);
+    return 0;
+}
+\end{lstlisting}
+
+Wywołanie funkcji przypisanej do zmiennej \verb|wynik1| w listingu \ref{lst:jp-memo}, wykona się cała funkcja \verb|test|, wyliczy wynik, wypiszę dane do pliku oraz dodatkowo zapiszę wynik w pamięci. Wywołanie \verb|wynik2| skorzysta z zapisanego wyniku i nie wykona żadnych instrukcji wywoływanej funkcji. Natomiast ostatnie wywołanie przypisane do zmiennej \verb|wynik3| ponownie wykona wszystkie instrukcję funkcji.
+
+\section{Przykłady działania}
+
+W tym punkcie przedstawiono przykłady działania języka korzystając z różnych bibliotek C.
+
+\subsection{glibc i standardowa biblioteka}
+
+W tym przykładzie zastosowano funkcje dostarczone przez bibliotekę glibc, takie jak \verb|printf|, \verb|malloc| oraz \verb|rand|.
+
+\begin{lstlisting}[caption={Przykład działania glibc}, morekeywords={func, lt, ptr, any}, label={lst:jp-przyklad1}]
+#include<bbuss/libc.bbuss>
+#include<bbuss/std.bbuss>
+
+/* fragment zawartosci plikow libc.bbuss i std.bbuss */
+extern func rand() int {}
+extern func malloc(int size) ptr {}
+extern func PrintlnInt(int arg) any {}
+/* ** */
+
+func fill(int size) ptr {
+    ptr arr = malloc(size*8);
+    for(int i = 0; i lt size; i = i + 1;) {
+        int scale = rand() % 10 + 1; // 1 - 10
+        arr[i] = i * 2 * scale;
+    }
+    return arr;
+}
+
+func main() int {
+    ptr array = fill(5);
+
+    for(int i = 0; i lt 5; i = i + 1;) {
+        PrintlnInt(array[i]);
+    }
+
+    return 0;
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Wynik przykładu \ref{lst:jp-przyklad1}}]
+0
+14
+32
+36
+32
+\end{lstlisting}
+
+Listing \ref{lst:jp-przyklad1} oprócz funkcji zdefiniowanych w glibc, zawiera funkcje \verb|PrintlnInt| zdefiniowaną w standardowej bibliotece języka.
+
+\subsection{Inne biblioteki}
+
+Blunderbuss może korzystać również z innych bibliotek C, takich jak \verb|ncurses| lub graficznej \verb|raylib|.
+
+\subsubsection{raylib}
+
+Raylib to lekka, wieloplatformowa biblioteka graficzna napisana w języku C, przeznaczona do gier oraz aplikacji multimedialnych. Udostępnia prosty interfejs API do obsługi grafiki, dlatego dobrym wyborem dla implementowanego języka.
+
+\begin{lstlisting}[caption={Przykład biblioteki raylib}, morekeywords={ptr, eq}, label={lst:jp-przyklad2}]
+#include<bbuss/raylib.bbuss>
+#include<bbuss/std.bbuss>
+#include<bbuss/libc.bbuss>
+
+#define WHITE 16777215
+#define BLACK 0
+#define FPS 60
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+
+
+func main() int {
+    ptr BLUE = ColorFromInt(0, 0, 255); 
+    ptr RED = ColorFromInt(255, 0, 0);
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "hello");
+    SetTargetFPS(FPS);
+    for(int i = WindowShouldClose(); i eq 0; i = WindowShouldClose();) {
+        BeginDrawing();
+        ClearBackground(RED);
+        DrawText("Witam w programie napisanym w raylib!", 200, 200, 20, BLUE);
+        EndDrawing();
+    }
+
+    CloseWindow();
+    return 0;
+}
+\end{lstlisting}
+
+Przykład biblioteki \verb|raylib| zawarty w listingu \ref{lst:jp-przyklad2} korzysta z małego zestawu funkcji, celem narysowania okna i wypisania tekstu. Oprócz tego korzysta z zdefiniowanych symboli, za pomocą dyrektywy \verb|#define|, która jest preprocesorowana przez \verb|GCC|. Poniżej przedstawiono wynik programu w postaci narysowanego okna.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{graf/przyklad-2-wynik.pdf}
+    \caption{Okno narysowane za pomocą biblioteki raylib}
+    \label{fig:jp-przyklad2-wynik}
+\end{figure}
+
+\subsubsection{ncurses}
+
+ncurses to biblioteka dla języka C, która umożliwia tworzenie tekstowych interfejsów użytkownika (TUI ang. \textit{text user interface}) w terminalu, obsługując okna, kolory, klawiaturę i mysz. Dzięki tej bibliotece można tworzyć animację, bardziej zaawansowane interfejsy, panele czy menu.
 
  
+\begin{lstlisting}
+#include<bbuss/ncurses.bbuss>
+#include<bbuss/libc.bbuss>
+
+#define TRUE 1
+#define ASCII_q 113
+
+func main() int {
+    initscr();
+    cbreak();
+    noecho();
+    keypad(0, TRUE);
+    nodelay(0, TRUE);
+    curs_set(0);
+
+    str txt = "hello";
+    int y = 50;
+    int x = 50;
+
+    int dy = 1;
+    int dx = 1;
+
+    int max_y = 100;
+    int max_x = 100;
+
+
+    for(int i = 0; i ne 1; i = 0;) {
+        clear();
+
+        mvprintw(y, x, "%s", txt);
+        refresh();
+
+        if(x le 50) {
+            dx = 1;
+        }
+
+        if(x ge (max_x - 5)) {
+            dx = -1;
+        }
+
+        x = x + dx;
+
+
+        usleep(16000*3);
+    }
+    endwin();
+    return 0;
+}
+\end{lstlisting}
+
+Powyższy kod to animacja wypisanego w terminalu słowa "hello" odbijającego się od krawędzi.\footnote{W przypadku braku animacji, rekomendowanym jest skorzystanie z programów posiadających wsparcie JavaScript, np. Adobe Acrobat Reader lub KDE Okular. W innym przypadku GIF z przykładem jest udostępniony jako załącznik do pracy.}
+
+
+\begin{figure}[h]
+    \centering
+    % \includemovie{1cm}{1cm}{graf/przyklad-3-wynik.gif}
+    \animategraphics[loop,autoplay,width=0.6\textwidth]{12}{graf/przyklad-3-wynik-}{0}{94}
+    \caption{Animacja utworzona za pomocą biblioteki ncurses}
+    \label{fig:jp-przyklad3-wynik}
+\end{figure}
+

@@ -17,7 +17,8 @@
 % biblioteka listings
 \usepackage{listings}
 \lstset{%
-morekeywords={string,exception,std,vector},% słowa kluczowe rozpoznawane przez pakiet listings
+morekeywords={string,exception,std,vector,elseif,eq,next},% słowa kluczowe rozpoznawane przez pakiet listings
+basicstyle=\ttfamily\small,
 language=C++,% C, Matlab, Python, SQL, TeX, XML, bash, ... – vide https://www.ctan.org/pkg/listings
 commentstyle=\textit,%
 identifierstyle=\textsf,%
@@ -32,6 +33,7 @@ breaklines=true,%
 escapeinside={@*}{*@},%
 }
 
+\usepackage{animate}
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 % pakiet minted
 %\usepackage{minted}
