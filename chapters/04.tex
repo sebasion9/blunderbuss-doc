@@ -1,7 +1,7 @@
 \chapter{Specyfikacja zewnętrzna}
 \label{ch:04}
 
-Zewnętrzna specyfikacja zawiera cenne informacje dla użytkowników kompilatora i języka programowania. Rozdział ten opisuję dokładnie wymagania do spełnienia aby poprawnie korzystać z kompilatora, instrukcje instalacji, instrukcje obsługi oraz przykłady działania programu.
+Zewnętrzna specyfikacja zawiera cenne informacje dla użytkowników kompilatora i języka programowania. Rozdział ten opisuje dokładnie wymagania niezbędne do poprawnego korzystania z kompilatora, instrukcje instalacji, instrukcje obsługi oraz przykłady działania programu.
 
 \section{Wymagania sprzętowe i programowe}
 
@@ -16,7 +16,7 @@ Istotnym elementem środowiska docelowego jest zastosowanie linuksowej konwencji
 
 Poniższe oprogramowanie jest wymagane do prawidłowej instalacji i działania kompilatora.
 \begin{itemize}
-    \item NASM w wersji 3.01 - warto zwrócić uwagę na wersję przy instalacji tego narzędzią za pomocą menadżera pakietów.
+    \item NASM w wersji 3.01 - warto zwrócić uwagę na wersję przy instalacji tego narzędzia za pomocą menadżera pakietów.
     \item Pakiet build-essentials
     \item GCC w wersji 15.2.1
     \item Go w wersji 1.12.5 - w przypadku budowania kompilatora ze źródła, alternatywą jest pobranie wersji skompilowanej z wydania repozytorium.
@@ -29,12 +29,12 @@ Zaleźnie od dystrybucji systemu Linux, narzędzia te można zainstalować za po
 \label{ch:04-instalacja}
 % Ubuntu 22.04 kernel 6.18.3-arch1-1
 % Arch 6.18.3-arch1-1
-Implementacja projektu odbywaa się głównie na systemie Arch Linux o architekturze \verb|x86-64| z jądrem w wersji \verb|6.18.3-arch1-1|. W celu weryfikacji poprawności działania oraz zapewnienie przenośności na inne dystrybucje, instalację przeprowadzono na systemie Ubuntu 22.04 LTS z wersją jądra \verb|6.18.3-arch1-1|. Pełna instalacja odbywa się za pomocą wiersza poleceń oraz zawiera budowanie kompilatora ze źródła. Na repozytorium dostępne są również pliki binarne oraz biblioteki - dostarczone do manualnej konfiguracji.
+Implementacja projektu odbywa się głównie na systemie Arch Linux o architekturze \verb|x86-64| z jądrem w wersji \verb|6.18.3-arch1-1|. W celu weryfikacji poprawności działania oraz zapewnienia przenośności na inne dystrybucje, instalację przeprowadzono na systemie Ubuntu 22.04 LTS z wersją jądra \verb|6.18.3-arch1-1|. Pełna instalacja odbywa się za pomocą wiersza poleceń oraz zawiera budowanie kompilatora ze źródła. Na repozytorium dostępne są również pliki binarne oraz biblioteki - dostarczone do manualnej konfiguracji.
 
 \begin{enumerate}
     \raggedright
     \item Należy zainstalować potrzebne narzędzia oraz pakiety znajdujące się w podrozdziale \ref{ch:04-wymagania-programowe}.
-    \item Sprawdzić wersje zainstalowanych narzędzi, w przypadku niepoprawnej instalacja oraz działanie kompilatora może zakończyć się sukcesem, natomiast nie jest to gwarantowane.
+    \item Sprawdzić wersje zainstalowanych narzędzi. W przypadku niepoprawnej instalacji działanie kompilatora może zakończyć się sukcesem, natomiast nie jest to gwarantowane.
     \break\verb|nasm -v|
     \break\verb|gcc -v|
     \break\verb|go version|
@@ -66,15 +66,15 @@ cp bbuss/lib/* "$PREFIX/include/bbuss"
 
 \section{Instrukcja obsługi}
 
-Ta instrukcja jest przeznaczony dla programistów korzystających z kompilatora oraz języka. W instrukcji omówiono strukturę zainstalowanego kompilatora, proces jego wykorzystania oraz sposób pracy z językiem programowania.
+Ta instrukcja jest przeznaczony dla programistów korzystających z kompilatora oraz języka. W instrukcji omówiono strukturę katalogów instalacji kompilatora, proces jego wykorzystania oraz sposób pracy z językiem programowania.
 
 \subsection{Kompilator}
 
 Skrypt instalacyjny tworzy trzy katalogi istotne do korzystania z języka programowania.
 \begin{enumerate}
     \item Katalog \verb|/opt/bbuss/bin/| jest odpowiedzialny za przechowywanie skompilowanych plików binarnych kompilatora.
-    \item \verb|/opt/bbuss/lib/| powinien zawierać wszystkie niestandardowe oraz zewnętrzne biblioteki, z których użytkownik może skorzystać. Katalog ten jest wstępnie uzupełniony standardową biblioteką języka.
-    \item Katalog \verb|/opt/bbuss/include/bbuss/| powinien zawierać wszystkie pliki nagłówkowe wymagane na etapie preprocesowania oraz kompilacji napisanych programów.
+    \item \verb|/opt/bbuss/lib/| zawiera wszystkie niestandardowe oraz zewnętrzne biblioteki, z których użytkownik może skorzystać. Katalog ten jest wstępnie uzupełniony standardową biblioteką języka.
+    \item Katalog \verb|/opt/bbuss/include/bbuss/| zawiera wszystkie pliki nagłówkowe wymagane na etapie preprocesowania oraz kompilacji napisanych programów.
 \end{enumerate}
 
 Uruchamianie kompilatora, tak samo jak instalacja, odbywa się za pomocą wiersza poleceń. Poniżej przedstawiono ogólny przykład korzystania z kompilatora, który obejmuję jego wszystkie funkcjonalności. Zakładając, że użytkownik nadal znajduję się w katalogu repozytorium \verb|blunderbuss| z punktu \ref{ch:04-instalacja}.
@@ -86,7 +86,7 @@ Uruchamianie kompilatora, tak samo jak instalacja, odbywa się za pomocą wiersz
     \label{fig:instr-git-tree}
 \end{figure}
 
-Katalog \verb|bbuss/examples| zawiera przykładowe kody źródłowe programów napisane w języku, z których można skorzystać.
+Katalog \verb|bbuss/examples| zawiera przykładowe kody źródłowe programów napisane w języku blunderbuss, z których można skorzystać.
 
 \begin{enumerate}
     \raggedright
@@ -147,7 +147,7 @@ func test(int a, str b) int {
 }
 \end{lstlisting}
 
-Wywołanie funkcji - wykonanie wszystkich instrukcji w ciele funkcji, odbywa się za pomocą składni \verb|test(1, "text")|.
+Wywołanie funkcji, czyli wykonanie wszystkich instrukcji w ciele funkcji, odbywa się za pomocą składni \verb|test(1, "text")|.
 
 \subsubsection{Instrukcja warunkowa}
 
@@ -166,7 +166,7 @@ Lista operatorów:
     \item \verb|%| - operator reszty z dzielenia (ang. \textit{modulo})
 \end{itemize}
 
-Przykład kodu źródłowego, który wykorzystuję instrukcję warunkowe:
+Przykład kodu źródłowego, który wykorzystuje instrukcję warunkowe:
 
 \begin{lstlisting}[caption={Instrukcja warunkowa}, label={lst:jp-if}, morekeywords={elseif, eq}]
 if(prod eq 11) {

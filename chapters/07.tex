@@ -1,11 +1,30 @@
 \chapter{Podsumowanie i wnioski}
 \label{ch:07}
-\begin{itemize}
-\item uzyskane wyniki w świetle postawionych celów i zdefiniowanych wyżej wymagań
-\item kierunki ewentualnych danych prac (rozbudowa funkcjonalna …)
-\item problemy napotkane w trakcie pracy
-\end{itemize}
 
-% ogólne wnioski jako chapter
+Implementacja kompilatora oraz zaprojektowanie własnego języka programowania stanowiło trudne zadanie. Pomimo wyzwań, projekt został zrealizowany i kompilator spełnia założone wcześniej wymagania funkcjonalne. Narzędzie umożliwia tworzenie programów zarówno w trybie tekstowym, jak i graficznym (z pomocą zewnętrznych bibliotek), co należy uznać za sukces.
+
+Realizacja tego projektu pozwoliła na poszerzenie wiedzy na temat teorii kompilatorów, analizy składniowej i semantycznej. Dodatkowo dzięki realizacji projektu pozwoliła na zdobycie praktycznych umiejętności w zakresie projektowania własnych języków.
+
 \section{Napotkane problemy}
+
+Z powodu naturalnej złożoności i specyfikacji projektu, liczba napotkanych problemów była znacząca. Dotyczyły one różnych etapów implementacji.
+
+\begin{enumerate}
+    \item Kolejność operatorów (ang. \textit{operator precedence}) można było rozwiązać na wiele sposobów. Jednak najwydajniejszym było zaimplementowanie kolejności operatorów już na etapie gramatyk formalnych.
+    \item Ramka stosu, wyrównanie stosu oraz standard wywoływania funkcji w asemblerze (ang. \textit{calling convention}).
+    \item Budowa drzewa zakresów - wstępnie struktura danych odpowiadająca za zakresy zmiennych znacznie się różniła i nie była drzewem.
+    \item Implementacja mechanizmu memoizacji - szczególnym wyzwaniem było generowanie w kodzie asemblerowym unikalnego klucza na podstawie argumentów funkcji oraz jej nazwy. Nieco mniej skomplikowane okazało się dynamiczne przekazywanie tych wartości do funkcji zewnętrznej znajdującej się w bibliotece standardowej.
+\end{enumerate}
+
 \section{Pomysły na przyszły rozwój}
+
+Lista pomysłów na przyszły rozwój jest niemała, spowodowane to jest wyborem projektu, którego można rozszerzać na wiele sposobów. Do tej listy z pewnością można zaliczyć:
+
+\begin{enumerate}
+    \item Rozbudowanie podstawowych typów języka - brakuje typów zmiennoprzecinkowych, typów liczb całkowitych o rozmiarach innych niż 64bit, wskaźników do konkretnych typów.
+    \item Rozbudowanie języka o struktury zawierające pola i referencje do metod.
+    \item Rozszerzenie standardowej biblioteki o więcej funkcji ułatwiających programistom tworzyć kod.
+    \item Uporządkowanie struktury generacji kodu w celu uogólnienia funkcji i pozbycia się zbędnego kodu w projekcie.
+    \item Wprowadzenie IR (intermediate representation) - pośredniej reprezentacji kodu.
+    \item Zwiększenie wydajności pamięci oraz wydajności czasowej kompilatora różnymi metodami optymalizacji.
+\end{enumerate}

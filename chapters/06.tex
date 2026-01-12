@@ -1,14 +1,90 @@
 \chapter{Weryfikacja i walidacja}
 \label{ch:06}
-% \begin{itemize}
-% \item sposób testowania w ramach pracy (np. odniesienie do modelu V)
-% \item organizacja eksperymentów
-% \item przypadki testowe zakres testowania (pełny/niepełny)
-% \item wykryte i usunięte błędy
-% \item opcjonalnie wyniki badań eksperymentalnych
-% \end{itemize}
+Istotnym etapem realizacji projektu są weryfikacja i walidacja, które mają na celu zapewnienie poprawności działania oraz wysokiej jakości tworzonego oprogramowania. Etapy te zostały zrealizowane z wykorzystaniem testów jednostkowych, umożliwiających systematyczne sprawdzanie poprawności poszczególnych komponentów oprogramowania.
 
+\section{Sposób testowania i testy}
 
-\section{Sposób testowania}
+Testowanie kompilatora zostało zrealizowane z wykorzystaniem testów jednostkowych, przy użyciu standardowego mechanizmu testowania dostępnego w języku \verb|Go|. Struktura testów wygląda następująco: dla pakietu implementowanego kompilatora (np. pakiet \verb|semantics.go|) należy utworzyć osobny plik \verb|semantics_test.go|.
+
+Za pomocą testów jednostkowych przetestowano wszystkie wizyty reguł parsera (wypisane w listingu \ref{lst:reguly-parsera}). Przykład wybranych testów znajduję się w listingu \ref{lst:tst-wizyty}.
+
+Listing \ref{lst:tst-wyniki} zawiera wyniki wybranych testów jednostkowych.
+
 \section{Wykryte i usunięte błędy}
+
+Podczas implementacji kompilatora napotkano parę błędów, co jest naturalnym zjawiskiem podczas projektu o takim poziomie trudności. Do wykrytych i usuniętych błędów można zaliczyć:
+
+\begin{itemize}
+    \item Zapisywanie łańcucha znaków w pamięci podczas memoizacji.
+    \item Kolejność wykonywania gałęzi \verb|elseif|.
+    \item Brak wyrównania stosu oraz poprawnych ramek stosu. W początkowej fazie implementacji, a dokładniej w czasie prototypowania, stos nie był wyrównywany do 16 bajtów, co powodowało w niespodziewanych momentach błąd pamięci.
+    \item Błędne korzystanie z ulotnych oraz nieulotnych rejestrów w kodzie asemblera skutkowało błędami pamięci.
+
+\end{itemize}
+
 \section{Testy optymalizacji metodą memoizacji}
+
+W celu weryfikacji poprawności działania mechanizmu memoizacji języka przeprowadzono testy wydajnościowe, polegające na porównaniu czasu wykonania funkcji przed i po zastosowaniu memoizacji wykorzystując słowa kluczowe \verb|cache| oraz \verb|safe|. Do pomiaru czasu wykonania wykorzystano funkcję \verb|clock()| (z biblioteki standardowej języka C), która umożliwia określenie czasu procesora zużytego przez program. Uzyskane wartości pozwoliły na porównanie czasu wykonania fragmentu kodu oraz ocenę wpływu zastosowanego mechanizmu. Testowana funkcja zawiera kosztowne operacje wraz z efektami ubocznymi.
+
+
+\begin{lstlisting}[caption={Test mechanizmu memoizacji}]
+#include <bbuss/libc.bbuss>
+#include <bbuss/std.bbuss>
+#define CLOCKS_PER_SEC 1
+
+cache func test(int num) int {
+    // efekty uboczne
+    for(int i = 0; i lt num; i = i + 1;) {
+        if(i eq (num/2)) {
+            PrintlnStr("efekty uboczne");
+        }
+    }
+    return num;
+}
+
+func main() int {
+
+    ptr start = clock();
+    int t1 = test(999999999);
+    ptr end = clock();
+    int elapsed1 = (end - start)/CLOCKS_PER_SEC;
+
+    start = clock();
+    int t2 = safe test(999999999);
+    end = clock();
+    int elapsed2 = (end - start)/CLOCKS_PER_SEC;
+
+    start = clock();
+    int t3 = test(999999999);
+    end = clock();
+    int elapsed3 = (end - start)/CLOCKS_PER_SEC;
+
+    PrintlnStr(Concat("pierwsze wywolanie: ", Itoa(t1)));
+    PrintlnStr(Concat("czas wykonania: ", Itoa(elapsed1)));
+
+    PrintlnStr(Concat("drugie wywolanie (z safe): ", Itoa(t2)));
+    PrintlnStr(Concat("czas wykonania: ", Itoa(elapsed2)));
+
+    PrintlnStr(Concat("trzecie wywolanie (cache): ", Itoa(t3)));
+    PrintlnStr(Concat("czas wykonania: ", Itoa(elapsed3)));
+
+    return 0;
+}
+\end{lstlisting}
+
+Pierwsze i drugie wyłowanie funkcji wykonują całe ciało funkcji, natomiast trzecie wywołanie odczytuję tylko wynik. Wyniki testu przedstawiają się następująco\footnote{Wyniki testu zostały zformatowane w celu zwiększenia czytelności}:
+
+\begin{lstlisting}[caption={Wyniki testu memoizacji}]
+efekty uboczne
+efekty uboczne
+
+pierwsze wywolanie: 999999999
+czas wykonania: 2261654
+
+drugie wywolanie (z safe): 999999999
+czas wykonania: 2264896
+
+trzecie wywolanie (odczyt cache): 999999999
+czas wykonania: 4
+\end{lstlisting}
+

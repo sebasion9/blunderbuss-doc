@@ -5,7 +5,7 @@ Specyfikacja wewnętrzna zawiera informację o architekturze projektu, kodzie or
 
 \section{Architektura kompilatora}
 
-Architektura kompilatora jest podzielona na dwie głowne części: część przędnia (dalej ang. \textit{frontend}) i część tylną (dalej ang. \textit{backend}). Frontend odpowiada za analize kodu źródłowego i jego poprawność semantyczną i składa się z leksera (analiza leksykalna), parsera (analiza składniowa) oraz analizy semantycznej., natomiast backend zajmuję się generacją kodu asemblerowego.
+Architektura kompilatora jest podzielona na dwie głowne części: część przednia (dalej ang. \textit{frontend}) i część tylną (dalej ang. \textit{backend}). Frontend odpowiada za analizę kodu źródłowego i jego poprawność semantyczną i składa się z leksera (analiza leksykalna), parsera (analiza składniowa) oraz analizy semantycznej., natomiast backend zajmuje się generacją kodu asemblerowego.
 
 \begin{figure}[h]
     \centering
@@ -16,11 +16,11 @@ Architektura kompilatora jest podzielona na dwie głowne części: część prz�
 
 \section{Parser i lekser}
 
-Parser oraz lekser to istotne fragmenty frontendu kompilatora, odpowiedzialne za wstępnę przetwarzanie kodu źródłowego. Moduły te zaimplementowane zostały za pomocą gramatyk formalnych narzędzia \verb|ANTLR|. W tym rozdziale szczegółowo zostaną opisane gramatyki formalne języka programowania w kontekście parsera i leksera, a także zastosowanie modułów w implementacji kompilatora.
+Parser oraz lekser to istotne fragmenty frontendu kompilatora, odpowiedzialne za wstępne przetwarzanie kodu źródłowego. Moduły te zaimplementowane zostały za pomocą gramatyk formalnych narzędzia \verb|ANTLR|. W tym rozdziale szczegółowo zostaną opisane gramatyki formalne języka programowania w kontekście parsera i leksera, a także zastosowanie modułów w implementacji kompilatora.
 
 \subsection{Gramatyki formalne} % szczegółowy opis Blunderbuss.g4
 
-Pojęcie gramatyk formalnych w kontekście teoretycznym zostało opisane w \ref{ch:02-analiza-leks-i-syntax}, natomiast w tym rozdziale uwagę skupiono na praktyczny kontekst. Gramatyki formalne narzędzia ANTLR korzysta z wzorców podobnych do wyrażeń regularnych.
+Pojęcie gramatyk formalnych w kontekście teoretycznym zostało opisane w \ref{ch:02-analiza-leks-i-syntax}, natomiast w tym rozdziale uwagę skupiono na praktyczny kontekst. Gramatyki formalne narzędzia ANTLR korzystają z wzorców podobnych do wyrażeń regularnych.
 
 \subsubsection{Reguły leksera}
 
@@ -204,14 +204,10 @@ type ScopeVar struct { expr any; type_ Type_; offset int }
 
 Zawarte w listingu \ref{lst:ok-kontekst} struktury \verb|CompilerConetxt| oraz \verb|ScopeTree| odpowiadają za utrzymanie zakresów zmiennych (i również funkcji) programu. \verb|ScopeTree| jest w reprezentowane za pomocą struktury danych drzewa. Natomiast struktury \verb|ScopeFunc|, \verb|ScopeFuncArg| oraz \verb|ScopeVar| implementują interfejs \verb|ScopeItf| i są odpowiedzialne za reprezentowanie zmiennych w drzewach zakresów.
 
-%TODO: traversowanie po zakresach
-%TODO: inne o zakresach
-%TODO: generowanie labeli
-
 Zdefiniowane metody w listingu \ref{lst:ok-wybrane} to rekurencyjne funkcje pomagające odnaleźć się w odpowiednim miejscu drzewa zakresów. Dodatkowo opisano metody pomagające nazywać blocki i funkcje.
 \begin{itemize}
-    \item \verb|GetScopeByName| - rekurencyjnie szuka nazwy zakresu schodząc w dół drzewa.
-    \item \verb|SearchIdUp| - szuka rekurencyjnie identyfikatora w góre po nazwie identyfikatora. Metoda używana do znajdowania odpowiedniego zakresu zawierającego identyfikator, wymagane do sprawdzania poprzednio zainicjalizowanych zmiennych.
+    \item \verb|GetScopeByName| - rekurencyjnie wyszukuje nazwy zakresu schodząc w dół drzewa.
+    \item \verb|SearchIdUp| - wyszukuje rekurencyjnie identyfikatora w góre po nazwie identyfikatora. Metoda używana do znajdowania odpowiedniego zakresu zawierającego identyfikator, wymagane do sprawdzania poprzednio zainicjalizowanych zmiennych.
     \item \verb|GetWhatFunc| - odpowiada zakresem aktualnej funkcji, w której jest wywoływana metoda.
     \item \verb|GetWhatFor| - zwraca zakres bloku najbliższego bloku \verb|for|, idąc w góre drzewa.
     \item \verb|BlockScopeName| - generuje przedrostek bloku na podstawie nazwy (np. instrukcji \verb|for| lub \verb|if|.
@@ -234,21 +230,19 @@ Na podstawie list instrukcji; \verb|global|, \verb|text| oraz \verb|data| genero
 
 \subsection{Interfejs wiersza poleceń}
 
-W celu sprawnego używania kompilatora, zaimplementowany został interfejs wiersza poleceń. Kod źródłowy znaduję się w listingu \ref{lst:cli}. Kompilator akceptuję na wejście trzy parametry:
+W celu sprawnego używania kompilatora, zaimplementowany został interfejs wiersza poleceń. Kod źródłowy znaduję się w listingu \ref{lst:cli}. Kompilator akceptuje na wejście trzy parametry:
 \begin{enumerate}
-    \item \verb|--input| - argument wskazujący ścieżke kodu źródłowego
-    \item \verb|--output| - argument wskazujący ścieżke pliku wyjściowego
+    \item \verb|--input| - argument wskazujący ścieżkę kodu źródłowego
+    \item \verb|--output| - argument wskazujący ścieżkę pliku wyjściowego
     \item \verb|--include| - argument informujący o katalogu zawierającym pliki nagłowkowe, ten argument jest potrzebny do warstwy pośredniej preprocesowania GCC, zawartej w listingu \ref{lst:cli-gcc}.
 \end{enumerate}
 
 \subsection{Obsługa błędów}
 
-Błędy w kontekscie projektu dzielone są na dwie kategorie: parsera i kompilatora. Idiomatyczne podejście do błędów owocuję w sprawniejszym testowaniu oraz czytelniejszym zwrotem informacji dla użytkownika.
-%TODO: opis listenera customowego syntaxu
-%TODO: rózny opis błędów, miejsca gdzie są wykorzystywane błędy, obsługa w mainie
+Błędy w kontekście projektu dzielone są na dwie kategorie: parsera i kompilatora. Idiomatyczne podejście do błędów owocują w sprawniejszym testowaniu oraz czytelniejszym zwrotem informacji dla użytkownika.
 \subsubsection{Błędy parsera}
 
-W celu zdefiniowania niestandardowego słuchacza (dalej ang. \textit{listener}) błędów, wymaganym jest usunięcie domyślnego listenera parsera dostarczanego przez narzędzie ANTLR. Podmiana listenerów oraz definicja znajduję się w listingu \ref{lst:err-parser}, gdzie błędy niepoprawnej składni są zbierane. W przypadku jakichkolwiek błędów, program się zatrzymuje oraz informuję użytkownika szczegółowym opisem błędu oraz jego lokalizacją w pliku tekstowym.
+W celu zdefiniowania niestandardowego słuchacza (dalej ang. \textit{listener}) błędów, wymaganym jest usunięcie domyślnego listenera parsera dostarczanego przez narzędzie ANTLR. Podmiana listenerów oraz definicja znajdują się w listingu \ref{lst:err-parser}, gdzie błędy niepoprawnej składni są zbierane. W przypadku jakichkolwiek błędów, program się zatrzymuje oraz informuję użytkownika szczegółowym opisem błędu oraz jego lokalizacją w pliku tekstowym.
 
 \subsubsection{Błędy kompilatora}
 

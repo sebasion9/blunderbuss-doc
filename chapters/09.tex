@@ -400,3 +400,120 @@ func PrintlnInt(arg C.long) {
 	fmt.Println(arg)
 }
 \end{lstlisting}
+
+\begin{lstlisting}[caption={Testy reguł parsera}, label={lst:tst-wizyty}, morekeywords={func, nil, any}]
+func TestAssignErr(t *testing.T) {
+    input := boilerplateMain("int a = 10; int b = c; int c = \"aaa\"; a[1] = 1; int a = 1;")
+	
+	/* boilerplate */
+
+    if len(visitor.Errors) != 5 {
+		t.Logf("error count: %d", len(visitor.Errors))
+		t.Logf("%v", visitor.Errors)
+		t.Fatalf("expected 4(5) errors")
+    }
+
+    var uve *semantics.UndefinedVariableError
+    var tme *semantics.TypeMismatchError
+    var ie *semantics.IndexError
+    var ive *semantics.InitializedVariableError
+
+    e1 := visitor.Errors[0]
+    if errors.As(e1, &uve) {
+		t.Logf("got expected UndefinedVariableError: %s", uve.Msg)
+    } else {
+		t.Fatalf("expected UndefinedVariableError, got %T: %v", e1, e1)
+    }
+
+    // helper error at [1] (undefined variable has type any)
+
+    e2 := visitor.Errors[2]
+    if errors.As(e2, &tme) {
+		t.Logf("got expected TypeMismatchError: %s", tme.Msg)
+    } else {
+		t.Fatalf("expected TypeMismatchError, got %T: %v", e2, e2)
+    }
+
+    e3 := visitor.Errors[3]
+    if errors.As(e3, &ie) {
+		t.Logf("got expected IndexError: %s", ie.Msg)
+    } else {
+		t.Fatalf("expected IndexError, got %T: %v", e2, e2)
+    }
+
+    e4 := visitor.Errors[4]
+    if errors.As(e4, &ive) {
+		t.Logf("got expected InitializedVariableError: %s", ive.Msg)
+    } else {
+		t.Fatalf("expected InitializedVariableError, got %T: %v", e4, e4)
+    }
+
+}
+
+func TestFnCallErr(t *testing.T) {
+    test_fn := "func test(int a, int b) int { return a + b; }\n"
+    input := test_fn + boilerplateMain("test(); test(1, 2); test(\"string\", 2);")
+
+	/* boilerplate */
+
+    e1 := visitor.Errors[0]
+    e2 := visitor.Errors[1]
+    var fme *semantics.FnMismatchError
+
+    if errors.As(e1, &fme) {
+		t.Logf("got expected FnMismatchError: %s", fme.Msg)
+    } else {
+		t.Fatalf("expected FnMismatchError, got %T: %v", e1, e1)
+    }
+
+    if errors.As(e2, &fme) {
+		t.Logf("got expected FnMismatchError: %s", fme.Msg)
+    } else {
+		t.Fatalf("expected FnMismatchError, got %T: %v", e2, e2)
+    }
+
+}
+
+func TestIdxErr(t *testing.T) {
+    input := boilerplateMain("ptr a; int b; str c; a[0] = 1; b[0] = 1; c[0] = 0;")
+
+	/* boilerplate */
+
+    e1 := visitor.Errors[0]
+    e2 := visitor.Errors[1]
+    var ie *semantics.IndexError
+
+    if errors.As(e1, &ie) {
+		t.Logf("got expected IndexError : %s", ie.Msg)
+    } else {
+		t.Fatalf("expected IndexError, got %T: %v", e1, e1)
+    }
+
+    if errors.As(e2, &ie) {
+		t.Logf("got expected IndexError: %s", ie.Msg)
+    } else {
+		t.Fatalf("expected IndexError, got %T: %v", e2, e2)
+    }
+}
+
+
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Wyniki wybranych testów}, label={lst:tst-wyniki}]
+=== RUN   TestAssignErr
+    semantics_test.go:44: got expected UndefinedVariableError: undefined variable: "c"
+    semantics_test.go:53: got expected TypeMismatchError: type mismatch: want: "int" got: "str"
+    semantics_test.go:60: got expected IndexError: can't index that, this is not a pointer "int a"
+    semantics_test.go:67: got expected InitializedVariableError: variable "int a" already initialized
+--- PASS: TestAssignErr (0.00s)
+=== RUN   TestFnCallErr
+    semantics_test.go:91: got expected FnMismatchError: mismatched function call argument count for function: "test" want: "0" got: "2"
+    semantics_test.go:97: got expected FnMismatchError: invalid argument type for function: "test" want: "int" got: "str"
+--- PASS: TestFnCallErr (0.00s)
+=== RUN   TestIdxErr
+    semantics_test.go:120: got expected IndexError : can't index that, this is not a pointer "int b"
+    semantics_test.go:126: got expected IndexError: can't index that, this is not a pointer "str c"
+--- PASS: TestIdxErr (0.00s)
+PASS
+ok      blunderbuss/cmd/semantics       0.002s
+\end{lstlisting}
