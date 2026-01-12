@@ -1,22 +1,281 @@
 \chapter{Specyfikacja wewnętrzna}
 \label{ch:05}
 
+Specyfikacja wewnętrzna zawiera informację o architekturze projektu, kodzie oraz przedstawia wybrane fragmenty implementacji kompilatora.
 
-% Jeśli „Specyfikacja wewnętrzna”:
-% \begin{itemize}
-% \item przedstawienie idei
-% \item architektura systemu
-% \item opis struktur danych (i organizacji baz danych)
-% \item komponenty, moduły, biblioteki, przegląd ważniejszych klas (jeśli występują)
-% \item przegląd ważniejszych algorytmów (jeśli występują)
-% \item szczegóły implementacji wybranych fragmentów, zastosowane wzorce projektowe
-% \item diagramy UML
-% \end{itemize}
+\section{Architektura kompilatora}
 
-\section{Architektura}
+Architektura kompilatora jest podzielona na dwie głowne części: część przędnia (dalej ang. \textit{frontend}) i część tylną (dalej ang. \textit{backend}). Frontend odpowiada za analize kodu źródłowego i jego poprawność semantyczną i składa się z leksera (analiza leksykalna), parsera (analiza składniowa) oraz analizy semantycznej., natomiast backend zajmuję się generacją kodu asemblerowego.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.1\textwidth]{graf/architektura.pdf}
+    \caption{Architektura kompilatora}
+    \label{fig:arch}
+\end{figure}
+
+\section{Parser i lekser}
+
+Parser oraz lekser to istotne fragmenty frontendu kompilatora, odpowiedzialne za wstępnę przetwarzanie kodu źródłowego. Moduły te zaimplementowane zostały za pomocą gramatyk formalnych narzędzia \verb|ANTLR|. W tym rozdziale szczegółowo zostaną opisane gramatyki formalne języka programowania w kontekście parsera i leksera, a także zastosowanie modułów w implementacji kompilatora.
+
+\subsection{Gramatyki formalne} % szczegółowy opis Blunderbuss.g4
+
+Pojęcie gramatyk formalnych w kontekście teoretycznym zostało opisane w \ref{ch:02-analiza-leks-i-syntax}, natomiast w tym rozdziale uwagę skupiono na praktyczny kontekst. Gramatyki formalne narzędzia ANTLR korzysta z wzorców podobnych do wyrażeń regularnych.
+
+\subsubsection{Reguły leksera}
+
+ANTLR rozpoczyna analizę od reguł leksera, w formacie gramatyk ANTLR reguły leksera rozpoczynają się od dużej litery. Do reguł leksera (tokenów), zaliczane są:
+\begin{itemize}
+    \item \textbf{słowa kluczowe}
+        \begin{lstlisting}[caption={Fragment listy słów kluczowych}]
+EXTERN: 'extern' ;
+ELSEIF: 'elseif' ;
+IF: 'if' ;
+ELSE: 'else' ;
+FOR: 'for' ;
+BREAK: 'break' ;
+NEXT: 'next' ;
+RETURN: 'return' ;
+        \end{lstlisting}
+    \item \textbf{operatory} - lecz również: nawiasy, przecinki
+        \begin{lstlisting}[caption={Fragment listy operatorów i innych}]
+PLUS: '+' ;
+MINUS: '-' ;
+MULT: '*' ;
+MOD: '%' ;
+DIV: '/' ;
+RBRACKET: ']' ;
+LBRACKET: '[' ;
+LPAREN: '(' ;
+RPAREN: ')' ;
+COMMA: ',' ;
+        \end{lstlisting}
+    \item \textbf{typy}
+        \begin{lstlisting}[caption={Lista typów}]
+TYPE: PTR | INT | STR | ANY ;
+ANY: 'any' ;
+PTR: 'ptr' ;
+INT: 'int' ;
+STR: 'str' ;
+        \end{lstlisting}
+    \item \textbf{literały, identyfikatory oraz komentarze} - \verb|fragment| to pomocnicza reguła leksera reprezentująca kawałek wzorca, używana w zwyczajnych regułach leksera (sam fragment nie może wygenerować tokenu). Instrukcja \verb|-> skip| pomija znaleziony wzorzec, zamiast wygenerować token, w tym przypadku wykorzystana jest dla komentarzy i znaków białych (ang. \textit{whitespace}).
+        \begin{lstlisting}[caption={Lista literałów, identyfikatorów oraz komentarzy}]
+fragment ESCAPE: '\\' [btnr"'\\] ;
+STRING
+    : SQUOTE (ESCAPE | ~['\\])* SQUOTE
+    | DQUOTE (ESCAPE | ~["\\])* DQUOTE
+    ;
+NUM: '-'? [0-9]+ ('.' [0-9]*)? ;
+ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
+WS  : [ \t\n\r]+ -> skip ;
+LINE_COMMENT: '/' '/' ~[\n\r]* -> skip ;
+BLOCK_COMMENT: '/' '*' .*? '*' '/' -> skip ;
+        \end{lstlisting}
+\end{itemize}
+
+\subsubsection{Reguły parsera}
+
+Następnie analizowane są reguły, zazwyczaj korzystają z reguł leksera. Ten etap może wygenerować drzewo składniowe (AST).
+
+\begin{itemize}
+    \item \textbf{program} - punktem wejściowym jest reguła parsera \textbf{program}.
+        \begin{lstlisting}[caption={Punkt wejściowy parsera}]
+grammar Blunderbuss;
+
+program: (func | extern)+ EOF;
+        \end{lstlisting}
+    \item \textbf{instrukcje} - instrukcje warunkowe, pętli, przypisania oraz instrukcje dozwolone w konkretnych warunkach. Charakterystyczną cechą jest fakt, że każda instrukcja kończy się znakiem \verb|;|.
+        \begin{lstlisting}[caption={Instrukcje}, label={lst:reguly-parsera}]
+stmt
+    : TYPE ID ASSIGN expr SEMI
+    | TYPE ID SEMI
+    | ID ASSIGN expr SEMI
+    | ID LBRACKET expr RBRACKET ASSIGN expr SEMI
+    | RETURN expr SEMI
+    | func_call SEMI
+    | NEXT SEMI
+    | BREAK SEMI
+    | if_stmt
+    | for_stmt
+    ;
+
+if_stmt: IF LPAREN expr RPAREN block
+    (ELSEIF LPAREN expr RPAREN block)*
+    (ELSE block)?
+    ;
+
+for_stmt: FOR
+    LPAREN stmt
+    expr SEMI
+    stmt
+    RPAREN block ;
+        \end{lstlisting}
+    \item \textbf{wyrażenia} - wyrażenia posiadają rekurencyjne reguły, oraz kolejność wykonywania działań, w tym kontekście dokładniej kolejność operatorów (ang. \textit{operator precedence}).
+        \begin{lstlisting}[caption={Wyrażenia}]
+expr
+    : EXCL expr
+    | AMPS expr
+    | expr op=(MULT | DIV | MOD) expr
+    | expr op=(PLUS | MINUS ) expr
+    | expr op=(AND | OR | EQUAL | NOT_EQUAL | LE | GE | LT | GT) expr
+    | expr LBRACKET expr RBRACKET
+    | LPAREN expr RPAREN
+    | NUM
+    | STRING
+    | ID
+    | func_call
+    ;
+        \end{lstlisting}
+    \item \textbf{funkcje} - funkcje to punkt startowy programu, w tym punkcie również uwzględniono reguły parsera wywoływania funkcji.
+        \begin{lstlisting}[caption={Funkcje}]
+extern
+    : EXTERN func
+    | EXTERN SYM;
+
+func: CACHE? FUNC ID args TYPE block ;
+args: LPAREN (param (COMMA param)*)? RPAREN ;
+param: TYPE ID ;
+
+block: LBRACE stmt* RBRACE ;
+
+call_args: LPAREN (expr (COMMA expr)*)? RPAREN ;
+func_call: SAFE? ID call_args ;
+        \end{lstlisting}
+\end{itemize}
+
+\subsection{Zastosowanie w projekcie}
+
+Zastosowanie leksera i parsera w projekcie zachodzi w pliku wejściowym programu \verb|main.go| w funkcji \verb|run|. Poniższy kod został minimalnie zmodyfikowany w celu usunięcia zbędnych instrukcji w kontekście zastosowania leksera i parsera.
+
+\begin{lstlisting}[caption={Zastosowanie leksera i parsera w go}, label={lst:lp-go}]
+input := antlr.NewInputStream(string(stdin))
+lexer := parsing.NewBlunderbussLexer(input)
+
+tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
+parser := parsing.NewBlunderbussParser(tokens)
+
+tree := parser.Program()
+visitor := semantics.NewBlunderbussVisitor()
+
+visitor.Visit(tree)
+\end{lstlisting}
+
+Zawarty kod w listingu \ref{lst:lp-go} w linii 4 tworzy strumień tokenów za pomocą leksera, a następnie na podstawie strumienia tokenów tworzy parser. Za pomocą opisanej metody wizytora w rozdziale \ref{ch:02-analiza-leks-i-syntax} rozpoczyna się proces analizy semantycznej drzewa składniowego.
+
 \section{Organizacja kodu}
+
+Język \verb|Go| nie jest docelowo językiem obiektowym, natomiast można za jego pomocą wykorzystywać niektóre schematy programowania obiektowego. Poniżej przedstawiono diagram klas kompilatora.
+
+%TODO: UML
+
 \subsection{Kontekst programu}
-\subsection{Generacja kodu}
+
+Kod kontekstu programu zawiera metody utrzymywania i tworzenia zakresów (ang. \textit{scope}) bloków programu. Dodatkowo kod zawiera struktury różnych typów zmiennych oraz funkcje pomocnicze odpowiadające za generowanie etykiet w odpowiednich miejsach w programie.
+
+%TODO: UML
+
+\begin{lstlisting}[caption={Struktury kontekstu kompilatora, zakresów oraz interfejs zmiennych}, label={lst:ok-kontekst}, morekeywords={type, string, interface, any, map}]
+
+type CompilerContext struct {
+	scopes *ScopeTree
+	currentScope *ScopeTree
+}
+
+type ScopeTree struct {
+	name string
+	children []*ScopeTree
+	parent *ScopeTree
+	vars map[string]ScopeItf
+	scopeType ScopeTreeType
+	currOff int
+}
+
+type ScopeItf interface {
+	Raw() any
+	Type() Type_
+	Offset() int
+}
+type ScopeFunc struct { id string; args []ScopeFuncArg; type_ Type_; isCache bool }
+type ScopeFuncArg struct { expr any; type_ Type_; idx int }
+type ScopeVar struct { expr any; type_ Type_; offset int }
+
+\end{lstlisting}
+%TODO: opis
+
+Zawarte w listingu \ref{lst:ok-kontekst} struktury \verb|CompilerConetxt| oraz \verb|ScopeTree| odpowiadają za utrzymanie zakresów zmiennych (i również funkcji) programu. \verb|ScopeTree| jest w reprezentowane za pomocą struktury danych drzewa. Natomiast struktury \verb|ScopeFunc|, \verb|ScopeFuncArg| oraz \verb|ScopeVar| implementują interfejs \verb|ScopeItf| i są odpowiedzialne za reprezentowanie zmiennych w drzewach zakresów.
+
+%TODO: traversowanie po zakresach
+%TODO: inne o zakresach
+%TODO: generowanie labeli
+
+Zdefiniowane metody w listingu \ref{lst:ok-wybrane} to rekurencyjne funkcje pomagające odnaleźć się w odpowiednim miejscu drzewa zakresów. Dodatkowo opisano metody pomagające nazywać blocki i funkcje.
+\begin{itemize}
+    \item \verb|GetScopeByName| - rekurencyjnie szuka nazwy zakresu schodząc w dół drzewa.
+    \item \verb|SearchIdUp| - szuka rekurencyjnie identyfikatora w góre po nazwie identyfikatora. Metoda używana do znajdowania odpowiedniego zakresu zawierającego identyfikator, wymagane do sprawdzania poprzednio zainicjalizowanych zmiennych.
+    \item \verb|GetWhatFunc| - odpowiada zakresem aktualnej funkcji, w której jest wywoływana metoda.
+    \item \verb|GetWhatFor| - zwraca zakres bloku najbliższego bloku \verb|for|, idąc w góre drzewa.
+    \item \verb|BlockScopeName| - generuje przedrostek bloku na podstawie nazwy (np. instrukcji \verb|for| lub \verb|if|.
+    \item \verb|EndFnLabel| - metoda pomocnicza generująca etykiete końca funkcji.
+\end{itemize}
+
+\subsection{Analiza semantyczna}
+
+Analiza semantyczna odbywa się w pliku źródłowym projektu \verb|semantics.go|, gdzie implementuje metody wizytora przechodzącego przez drzewo składniowe (AST). Metody wizytujące są oddelegowywane poprzez \verb|Visit|.
+
+Odpowiednie metody zawarte w listingu \ref{lst:ok-visit} odzwierciedlają reguły parsera zdefiniowane w gramatykach formalnych (listing \ref{lst:reguly-parsera}).
+
+Wybrana metoda zawarta w listingu \ref{lst:ok-wybrane-wizytor} zawiera "wizyte" reguły parsera \verb|for_stmt| (zdefiniowanej w \ref{lst:reguly-parsera}). Ta metoda odpowiada za przygotowanie listy instrukcji wymaganej dla pętli \verb|for| oraz przygotowywuję etykiety potrzebne do prawidłowej kontroli przepływu programu. W ciele funkcji tworzony jest nowy zakres zmiennych oraz oddelegowywane są wizyty do reguł parsera \verb|stmt|, \verb|block| czy \verb|expr|.
+
+\subsection{Generacja kodu asemblerowego}
+
+Na etapie analizy semantycznej zbierane są etykiety oraz instrukcję, które są przechowywane w strukturze \verb|Codegen| jako lista typu \verb|Instruction| (definicja zawarta w listingu \ref{lst:gen-struktury}).
+
+Na podstawie list instrukcji; \verb|global|, \verb|text| oraz \verb|data| generowany jest kod asemblerowy w postaci ciągu znaków. W kolejnych etapach w przypadku braku błędów, kod ten wypisywany jest do pliku wyjściowego.
+
+\subsection{Interfejs wiersza poleceń}
+
+W celu sprawnego używania kompilatora, zaimplementowany został interfejs wiersza poleceń. Kod źródłowy znaduję się w listingu \ref{lst:cli}. Kompilator akceptuję na wejście trzy parametry:
+\begin{enumerate}
+    \item \verb|--input| - argument wskazujący ścieżke kodu źródłowego
+    \item \verb|--output| - argument wskazujący ścieżke pliku wyjściowego
+    \item \verb|--include| - argument informujący o katalogu zawierającym pliki nagłowkowe, ten argument jest potrzebny do warstwy pośredniej preprocesowania GCC, zawartej w listingu \ref{lst:cli-gcc}.
+\end{enumerate}
+
+\subsection{Obsługa błędów}
+
+Błędy w kontekscie projektu dzielone są na dwie kategorie: parsera i kompilatora. Idiomatyczne podejście do błędów owocuję w sprawniejszym testowaniu oraz czytelniejszym zwrotem informacji dla użytkownika.
+%TODO: opis listenera customowego syntaxu
+%TODO: rózny opis błędów, miejsca gdzie są wykorzystywane błędy, obsługa w mainie
+\subsubsection{Błędy parsera}
+
+W celu zdefiniowania niestandardowego słuchacza (dalej ang. \textit{listener}) błędów, wymaganym jest usunięcie domyślnego listenera parsera dostarczanego przez narzędzie ANTLR. Podmiana listenerów oraz definicja znajduję się w listingu \ref{lst:err-parser}, gdzie błędy niepoprawnej składni są zbierane. W przypadku jakichkolwiek błędów, program się zatrzymuje oraz informuję użytkownika szczegółowym opisem błędu oraz jego lokalizacją w pliku tekstowym.
+
+\subsubsection{Błędy kompilatora}
+
+Błędy kompilatora zabierane są podczas analizy semantycznej i tak jak w przypadku błędów parsera, zatrzymują dalsze etapy programu oraz wypisują na standardowe wyjście znalezione błędy. W listingu \ref{lst:err-compiler} można znaleźć definicje błędów:
+
+\begin{itemize}
+    \item \verb|UndefinedVariableError|
+    \item \verb|InitializedVariableError|
+    \item \verb|TypeMismatchError|
+    \item \verb|IndexError|
+    \item \verb|FnMismatchError|
+\end{itemize}
+
 \subsection{Standardowa biblioteka}
 
+Standardowa biblioteka jest zaimplementowana w języku \verb|Go| oraz jest kompilowana i instalowana wraz z implementowanym kompilatorem. Domyślnie zawiera wewnętrzne funkcje odpowiedzialne za memoizacje, lecz również jest to miejsce przeznaczone do definiowania innych przydatnych funkcji należących do standardu.
+
+\subsubsection{Memoizacja}
+
+Istnieją dwie wewnętrzne funkcje odpowiedzialne za memoizację: \verb|____SetM| oraz \verb|____GetM|. Ich definicja znajduję się w listingu \ref{lst:sb-mem}, gdzie za pomocą przekształceń typów z języka C na Go, zapisywane i odczytywane są wyniki funkcji. Kluczem mapy jest wynik funkcji haszującej\footnote{Funkcja haszująca jest deterministycznym algorytmem, który przekształca dane o dowolnej długości w hash, stosowany m.in. do porównywania danych, indeksowania oraz zapewniania integralności informacji.}, a wartością jest zwracany wynik funkcji. Na wejście funkcji haszującej wchodzi nazwa funkcji oraz wartości jej argumentów wywołania.
+
+\subsubsection{Inne definicje}
+
+W bibliotece standardowej, mogą znajdować się definicję innych funkcji (listing \ref{lst:sb-inne}) wspomagających język. Przykładowe funkcje standardowej biblioteki:
+\begin{itemize}
+    \item \verb|Itoa|
+    \item \verb|PrintlnStr|
+    \item \verb|PrintlnInt|
+\end{itemize}
 

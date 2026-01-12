@@ -1,29 +1,402 @@
 \chapter{Źródła}
 
-Jeżeli w pracy konieczne jest umieszczenie długich fragmentów kodu źródłowego, należy je przenieść w to miejsce.
+\begin{lstlisting}[caption={Wybrane metody kontekstu kompilatora}, label={lst:ok-wybrane}, morekeywords={type, string, interface, any, map, func}]
+func (st *ScopeTree) GetScopeByName(name string) *ScopeTree {
+	for _, c := range st.GetChildren() {
+		if c.name == name {
+			return c
+		}
+		foundScope := c.GetScopeByName(name)
+		if foundScope != nil {
+			return foundScope
+		}
+	}
+	return nil
+}
 
-\begin{lstlisting}
-if (_nClusters < 1)
-	throw std::string ("unknown number of clusters");
-if (_nIterations < 1 and _epsilon < 0)
-	throw std::string ("You should set a maximal number of iteration or minimal difference -- epsilon.");
-if (_nIterations > 0 and _epsilon > 0)
-	throw std::string ("Both number of iterations and minimal epsilon set -- you should set either number of iterations or minimal epsilon.");
+func SearchIdUp(scope *ScopeTree, id string) *ScopeTree {
+	if scope == nil {
+		return nil
+	}
+	vars := *scope.GetVars()
+	if _, found := vars[id]; found {
+		return scope
+	}
+	return SearchIdUp(scope.GetParent(), id)
+}
+
+func GetWhatFunc(scope *ScopeTree) *ScopeTree {
+	if scope.scopeType == FUNC {
+		return scope
+	}
+	return GetWhatFunc(scope.GetParent())
+}
+
+func GetWhatFor(scope *ScopeTree) *ScopeTree {
+	if scope.scopeType == FOR {
+		return scope
+	}
+	return GetWhatFor(scope.GetParent())
+}
+
+func BlockScopeName(name string) string {
+	scopeName := fmt.Sprintf("BLOCK__SCOPE__%s__%d", name, scopeId)
+	scopeId++
+	return scopeName
+}
+
+func EndFnLabel(name string) string {
+	return fmt.Sprintf("END__%s", name)
+}
+
 \end{lstlisting}
 
+\begin{lstlisting}[caption={Metoda Visit drzewa składniowego}, label={lst:ok-visit}, morekeywords={type, string, interface, any, map, func}]
+func (v *Visitor) Visit(tree antlr.ParseTree) any {
+	switch ctx := tree.(type) {
+	case *parsing.ProgramContext:
+		return v.VisitProgram(ctx)
+	case *parsing.FuncContext:
+		return v.VisitFunc(ctx)
+	case *parsing.ArgsContext:
+		return v.VisitArgs(ctx)
+	case *parsing.StmtContext:
+		return v.VisitStmt(ctx)
+	case *parsing.ExprContext:
+		return v.VisitExpr(ctx)
+	case *parsing.ParamContext:
+		return v.VisitParam(ctx)
+	case *parsing.Effect_blockContext:
+		return v.VisitEffect_block(ctx)
+	case *parsing.BlockContext:
+		return v.VisitBlock(ctx)
+	case *parsing.For_stmtContext:
+		return v.VisitFor_stmt(ctx)
+	case *parsing.If_stmtContext:
+		return v.VisitIf_stmt(ctx)
+	case *parsing.Func_callContext:
+		return v.VisitFunc_call(ctx)
+	case *parsing.Call_argsContext:
+		return v.VisitCall_args(ctx)
+	default:
+		return ctx.Accept(v)
+	}
+}
+\end{lstlisting}
 
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% Pakiet minted wymaga odkomentowania w pliku config/settings.tex   %
-% importu pakietu minted: \usepackage{minted}                       %
-% i specjalnego kompilowania:                                       %
-% pdflatex -shell-escape praca                                      %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+\begin{lstlisting}[caption={Wybrana metoda wizytująca}, label={lst:ok-wybrane-wizytor}, morekeywords={type, string, interface, any, map, func}]
+func (v *Visitor) VisitFor_stmt(ctx *parsing.For_stmtContext) any {
+	scopeName := BlockScopeName("for")
+	startLabel := StartBlockLabel(scopeName)
+	endLabel := EndBlockLabel(scopeName)
+	stmtLabel := EndStmtLabel(scopeName)
 
-%\begin{minted}[linenos,breaklines,frame=lines]{c++}
-%if (_nClusters < 1)
-%   throw std::string ("unknown number of clusters");
-%if (_nIterations < 1 and _epsilon < 0)
-%   throw std::string ("You should set a maximal number of iteration or minimal difference -- epsilon.");
-%if (_nIterations > 0 and _epsilon > 0)
-%   throw std::string ("Both number of iterations and minimal epsilon set -- you should set either number of iterations or minimal epsilon.");
-%\end{minted}
+	parent := v.cctx.GetCurrScope()
+	scope := NewScopeTree(scopeName, parent, FOR)
+	v.cctx.currentScope = scope
+
+	v.Visit(ctx.Stmt(0))
+	v.GenLabel(startLabel)
+	// init variable
+	// eval expr
+	condition := v.Visit(ctx.Expr()).(*ScopeVar)
+	// check condition, break
+	v.GenCmpAddrReg(condition.offset, "0")
+	v.GenJz(endLabel)
+
+	// visit stmts
+	v.Visit(ctx.Block())
+
+	// increment
+	v.GenLabel(stmtLabel)
+	v.Visit(ctx.Stmt(1))
+
+	// jump to start
+	v.GenJmp(startLabel)
+	v.GenLabel(endLabel)
+
+	v.cctx.currentScope = parent
+	return nil
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Struktury generacji kodu}, label={lst:gen-struktury}, morekeywords={type, string}]
+type Instruction struct {
+	op string
+	dst *string
+	src *string
+}
+
+type Codegen struct {
+	global []Instruction
+	text []Instruction
+	data []Instruction
+};
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Generacja kodu asemblera z instrukcji}, label={lst:gen-generacja}, morekeywords={func, string}]
+func instrArrToString(arr []Instruction) string {
+	asm := ""
+	for _, instr := range arr {
+		asm = fmt.Sprintf("%s\n%s", asm, instr.toString())
+	}
+	return asm
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Interfejs wiersza poleceń}, label={lst:cli}, morekeywords={type, func, string}]
+type Options struct {
+	Input string
+	Output string
+	IncludeDir string
+}
+
+func NewRootCmd() (*cobra.Command, *Options) {
+	opts := &Options{}
+	cmd := &cobra.Command {
+		Use: "blunderbuss",
+		Short: "A compiler for blunderbuss",
+	}
+
+	cmd.Flags().StringVarP(&opts.Input, "input", "i", "", "source file")
+	cmd.Flags().StringVarP(&opts.Output, "output", "o", "a.asm", "output file")
+	cmd.Flags().StringVarP(&opts.IncludeDir, "include", "I", "", "include directory")
+
+	cmd.MarkFlagRequired("input")
+	cmd.MarkFlagRequired("include")
+
+	return cmd, opts
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Warstwa pośrednia dla preprocesowania GCC}, label={lst:cli-gcc}, morekeywords={func, string, nil}]
+func Preprocess(filename string, includeDir string) []byte {
+	fmt.Println("[BBUSS] preprocess and compiler step...")
+
+	cmd := exec.Command("gcc", "-E", "-P", "-x", "c", "-I"+includeDir, filename)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("[ERR] failed to preprocess with GCC")
+		fmt.Println(string(out))
+		os.Exit(1)
+		return nil
+	}
+	fmt.Println(string(out))
+
+	return out
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Definicja błędów parsera}, label={lst:err-parser}, morekeywords={type, string, nil}]
+// error.go
+type SyntaxError struct {
+    Msg  string
+    Text string
+    Line int
+    Col  int
+}
+
+type CustomErrorListener struct {
+    *antlr.DefaultErrorListener
+    Errors []SyntaxError
+}
+
+func (l *CustomErrorListener) SyntaxError(
+    recognizer antlr.Recognizer,
+    offendingSymbol interface{},
+    line, column int,
+    msg string,
+    e antlr.RecognitionException,
+) {
+    tokenText := ""
+    if t, ok := offendingSymbol.(antlr.Token); ok {
+        tokenText = t.GetText()
+    }
+
+    l.Errors = append(l.Errors, SyntaxError{
+        Msg:  msg,
+        Text: tokenText,
+        Line: line,
+        Col:  column,
+    })
+}
+
+// main.go
+parser.RemoveErrorListeners()
+listener := &semantics.CustomErrorListener{}
+parser.AddErrorListener(listener)
+
+if len(listener.Errors) > 0 {
+	fmt.Println("[ERR] Syntax errors found")
+	for _, e := range listener.Errors {
+		fmt.Printf("Syntax error at %d:%d near '%s': %s\n", 
+			e.Line, e.Col, e.Text, e.Msg)
+	}
+	os.Exit(1)
+}
+
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Definicja błędów kompilatora}, label={lst:err-compiler}, morekeywords={type, string, error, nil, func}]
+//error.go
+type CompilerError interface {
+	error
+	Context() antlr.ParserRuleContext
+}
+
+type BaseCompilerError struct {
+	Msg string
+	Ctx antlr.ParserRuleContext
+}
+
+func (e *BaseCompilerError) Error() string {
+	token := e.Ctx.GetStart()
+	return fmt.Sprintf("Compiler error at line %d:%d: %s", 
+		token.GetLine(), token.GetColumn(), e.Msg)
+}
+
+func (e *BaseCompilerError) Context() antlr.ParserRuleContext {
+	return e.Ctx
+}
+
+type UndefinedVariableError struct {
+	*BaseCompilerError
+	VarName string
+}
+
+type InitializedVariableError struct {
+	*BaseCompilerError
+	Type string
+	VarName string
+}
+
+type TypeMismatchError struct {
+    *BaseCompilerError
+    Expected string
+    Got string
+}
+
+type IndexError struct {
+	*BaseCompilerError
+	Type string
+	VarName string
+}
+
+type FnMismatchError struct {
+	*BaseCompilerError
+	FnName string
+	Expected string
+	Got string
+	Reason string
+}
+
+//main.go
+visitor := semantics.NewBlunderbussVisitor()
+if len(visitor.Errors) > 0 {
+	fmt.Println("[ERR] Compilation failed with errors:")
+	for _, e := range visitor.Errors {
+		fmt.Println(e)
+	}
+	os.Exit(1)
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Memoizacja w standardowej bibliotece}, label={lst:sb-mem}, morekeywords={func, nil, string, C.long, int64, var, any}]
+//export ____SetM
+func ____SetM(values *C.long, types *C.long, length C.long) {
+	var goArgs []any
+	var i int64
+	cptr := C.malloc(8)
+	for i = 0; i < int64(length); i ++ {
+		val := *(*C.long)(unsafe.Pointer(uintptr(unsafe.Pointer(values)) + uintptr(i)*unsafe.Sizeof(*values)))
+		t := *(*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(types)) + uintptr(i)*unsafe.Sizeof(*types)))
+
+		switch t {
+		case 1:
+			if i == int64(length) - 1 {
+				*(*int64)(cptr) = int64(val)
+			}
+			goArgs = append(goArgs, int64(val))
+		case 2:
+			str := C.GoString((*C.char)(unsafe.Pointer(uintptr(val))))
+			goArgs = append(goArgs, str)
+			if i == int64(length) - 1 {
+				cstr := C.CString(str)
+				*(*uintptr)(cptr) = uintptr(unsafe.Pointer(cstr))
+			}
+		case 3:
+			ptr := unsafe.Pointer(uintptr(val))
+			goArgs = append(goArgs, ptr)
+		case 0:
+			ptr := unsafe.Pointer(uintptr(val))
+			goArgs = append(goArgs, ptr)
+		default:
+		}
+	}
+	var key uint64 
+	if len(goArgs) == 1 {
+		key = Hash(goArgs[0].(unsafe.Pointer))
+	} else {
+		key = Hash(goArgs[0].(unsafe.Pointer), goArgs[1:len(goArgs)-1]...)
+	}
+
+
+	m[key] = cptr
+}
+
+//export ____GetM
+func ____GetM(values *C.long, types *C.long, length C.long) unsafe.Pointer {
+	var goArgs []any
+	var i int64
+	for i = 0; i < int64(length); i ++ {
+		val := *(*C.long)(unsafe.Pointer(uintptr(unsafe.Pointer(values)) + uintptr(i)*unsafe.Sizeof(*values)))
+		t := *(*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(types)) + uintptr(i)*unsafe.Sizeof(*types)))
+
+		switch t {
+		case 1:
+			goArgs = append(goArgs, int64(val))
+		case 2:
+			str := C.GoString((*C.char)(unsafe.Pointer(uintptr(val))))
+			goArgs = append(goArgs, str)
+		case 3:
+			ptr := unsafe.Pointer(uintptr(val))
+			goArgs = append(goArgs, ptr)
+		case 0:
+			ptr := unsafe.Pointer(uintptr(val))
+			goArgs = append(goArgs, ptr)
+		default:
+		}
+	}
+
+	var key uint64 
+	if len(goArgs) == 1 {
+		key = Hash(goArgs[0].(unsafe.Pointer))
+	} else {
+		key = Hash(goArgs[0].(unsafe.Pointer), goArgs[1:len(goArgs)-1]...)
+	}
+
+	if val, ok := m[key]; ok {
+		return val
+	}
+	return nil
+
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Inne definicje funkcji w standardowej bibliotece}, label={lst:sb-inne}, morekeywords={func, C.long, int64, int, string, nil}]
+//export Itoa
+func Itoa(num C.long) *C.char {
+	s := strconv.FormatInt(int64(num), 10)
+	return C.CString(s)
+}
+
+//export PrintlnStr
+func PrintlnStr(arg *C.char) {
+	fmt.Println(C.GoString(arg))
+}
+
+//export PrintlnInt
+func PrintlnInt(arg C.long) {
+	fmt.Println(arg)
+}
+\end{lstlisting}

@@ -8,6 +8,7 @@ Projektowanie oraz implementacja kompilatora wymaga zrozumienia jego podstawowyc
 Kompilatory języków programowania posiadają bogatą historię, a wiele schematów i technik opracowanych w przeszłości jest stosowanych także współcześnie. Ich ewolucja obejmuje zarówno rozwój etapów przetwarzania programu - takich jak analiza leksykalna, parser, analiza semantyczna i generacja kodu wynikowego - jak i wprowadzenie nowoczesnych mechanizmów optymalizacyjnych, w tym memoizacji funkcji czystych.
 
 \subsection{Analiza leksykalna i analiza składniowa}
+\label{ch:02-analiza-leks-i-syntax}
 
 Analize leksykalną oraz analizę składniową często są przeprowadzone w oparciu o gramatyki formalne, skutkując znacznym uproszczeniem implementacji kompilatora. Gramatyki formalne \cite{bib:automata-theory-langs-and-computation} to zdefiniowany sposób opisywania języków formalnych, czyli zbiorów poprawnych ciągów symboli nad danym alfabetem. Gramatyki określają jakie konstrukcje są dozwolone i według jakich reguł mogą być tworzone, niezależnie od ich znaczenia. Są wykorzystywane między innymi w opisie protokołów komunikacyjnych, języków zapytań, formatów plików, teorii automatów lub jak w tym przypadku, w budowie kompilatorów i analizie języków programowania. Gramatyki formalne w ANTLR \cite{bib:antlr} są definiowane za pomocą składni opierającej się na notacji EBNF (Extended Backus-Naur Form). Wszystkie poniższe przykłady przytoczone w tym punkcie są reprezentowane gramatykami formalnymi akceptowanymi przez narzędzie ANTLR w wersji 4.
 
