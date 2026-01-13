@@ -1,5 +1,82 @@
 \chapter{Źródła}
 
+\begin{lstlisting}[caption={Zastosowanie biblioteki ncurses}, label={lst:jp-przyklad-nc}]
+#include<bbuss/ncurses.bbuss>
+#include<bbuss/libc.bbuss>
+
+#define TRUE 1
+#define ASCII_q 113
+
+func main() int {
+    initscr();
+    cbreak();
+    noecho();
+    keypad(0, TRUE);
+    nodelay(0, TRUE);
+    curs_set(0);
+
+    str txt = "hello";
+    int y = 50;
+    int x = 50;
+
+    int dy = 1;
+    int dx = 1;
+
+    int max_y = 100;
+    int max_x = 100;
+
+
+    for(int i = 0; i ne 1; i = 0;) {
+        clear();
+
+        mvprintw(y, x, "%s", txt);
+        refresh();
+
+        if(x le 50) {
+            dx = 1;
+        }
+
+        if(x ge (max_x - 5)) {
+            dx = -1;
+        }
+
+        x = x + dx;
+
+
+        usleep(16000*3);
+    }
+    endwin();
+    return 0;
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Struktury kontekstu kompilatora, zakresów oraz interfejs zmiennych}, label={lst:ok-kontekst}, morekeywords={type, string, interface, any, map}]
+
+type CompilerContext struct {
+	scopes *ScopeTree
+	currentScope *ScopeTree
+}
+
+type ScopeTree struct {
+	name string
+	children []*ScopeTree
+	parent *ScopeTree
+	vars map[string]ScopeItf
+	scopeType ScopeTreeType
+	currOff int
+}
+
+type ScopeItf interface {
+	Raw() any
+	Type() Type_
+	Offset() int
+}
+type ScopeFunc struct { id string; args []ScopeFuncArg; type_ Type_; isCache bool }
+type ScopeFuncArg struct { expr any; type_ Type_; idx int }
+type ScopeVar struct { expr any; type_ Type_; offset int }
+
+\end{lstlisting}
+
 \begin{lstlisting}[caption={Wybrane metody kontekstu kompilatora}, label={lst:ok-wybrane}, morekeywords={type, string, interface, any, map, func}]
 func (st *ScopeTree) GetScopeByName(name string) *ScopeTree {
 	for _, c := range st.GetChildren() {

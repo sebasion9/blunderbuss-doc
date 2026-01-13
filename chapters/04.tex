@@ -97,6 +97,7 @@ Katalog \verb|bbuss/examples| zawiera przykładowe kody źródłowe programów n
             \item \verb|-o| to opcjonalna flaga, wskazująca ścieżke wygenerowanego kodu asemblerowego. Do lokalizacji pliku wyjściowego wykorzystano katalog repozytorium \verb|target|.
             \item Flaga \verb|-I| jest wymagana i odpowiedzialna za ścieżkę do katalogu z plikami nagłówkowymi. Podczas instalacji, pliki nagłówkowe znajdującę sie w repozytorium zostały zainstalowane w katalogu \verb|/opt/bbuss/include|.
         \end{itemize}
+    \newpage
     \item Następnym krokiem jest użycie narzędzia \verb|nasm| aby przetworzyć wygenerowany kod asemblera do pliku obiektowego zawierającego kod maszynowy.
     \break\verb|nasm -f elf64 target/test.asm -o target/test.o|
     \break Fragment \verb|-f elf64| jest odpowiedzialny za wybór formatu ELF 64-bit, zgodnego z wymaganiami projektu.
@@ -120,6 +121,7 @@ Język programowanie \verb|blunderbuss| jest wzorowany na języku C, dlatego te�
 
 Pliki nagłówkowe zawierają deklaracje funkcji bibliotek C (w tym np. glibc) lub biblioteki języka blunderbuss. Funkcje deklarowane są za pomocą słowa kluczowego \verb|extern|, poniżej przykładowe deklaracje.
 
+\newpage
 \begin{lstlisting}[caption={Deklaracje funkcji w pliku nagłówkowym}, label={lst:jp-header}, morekeywords={func, ptr, str}]
 extern func printf(str fmt, any msg) any {}
 extern func rand() int {}
@@ -227,6 +229,7 @@ W tym punkcie przedstawiono przykłady działania języka korzystając z różny
 
 W tym przykładzie zastosowano funkcje dostarczone przez bibliotekę glibc, takie jak \verb|printf|, \verb|malloc| oraz \verb|rand|.
 
+\newpage
 \begin{lstlisting}[caption={Przykład działania glibc}, morekeywords={func, lt, ptr, any}, label={lst:jp-przyklad1}]
 #include<bbuss/libc.bbuss>
 #include<bbuss/std.bbuss>
@@ -304,6 +307,7 @@ func main() int {
 }
 \end{lstlisting}
 
+\newpage
 Przykład biblioteki \verb|raylib| zawarty w listingu \ref{lst:jp-przyklad2} korzysta z małego zestawu funkcji, celem narysowania okna i wypisania tekstu. Oprócz tego korzysta z zdefiniowanych symboli, za pomocą dyrektywy \verb|#define|, która jest preprocesorowana przez \verb|GCC|. Poniżej przedstawiono wynik programu w postaci narysowanego okna.
 
 \begin{figure}[h]
@@ -317,61 +321,10 @@ Przykład biblioteki \verb|raylib| zawarty w listingu \ref{lst:jp-przyklad2} kor
 
 ncurses to biblioteka dla języka C, która umożliwia tworzenie tekstowych interfejsów użytkownika (TUI ang. \textit{text user interface}) w terminalu, obsługując okna, kolory, klawiaturę i mysz. Dzięki tej bibliotece można tworzyć animację, bardziej zaawansowane interfejsy, panele czy menu.
 
- 
-\begin{lstlisting}
-#include<bbuss/ncurses.bbuss>
-#include<bbuss/libc.bbuss>
-
-#define TRUE 1
-#define ASCII_q 113
-
-func main() int {
-    initscr();
-    cbreak();
-    noecho();
-    keypad(0, TRUE);
-    nodelay(0, TRUE);
-    curs_set(0);
-
-    str txt = "hello";
-    int y = 50;
-    int x = 50;
-
-    int dy = 1;
-    int dx = 1;
-
-    int max_y = 100;
-    int max_x = 100;
+Kod zawarty w listingu \ref{lst:jp-przyklad-nc} to animacja wypisanego w terminalu słowa "hello" odbijającego się od krawędzi.\footnote{W przypadku braku animacji, rekomendowanym jest skorzystanie z programów posiadających wsparcie JavaScript, np. Adobe Acrobat Reader lub KDE Okular. W innym przypadku GIF z przykładem jest udostępniony jako załącznik do pracy.}
 
 
-    for(int i = 0; i ne 1; i = 0;) {
-        clear();
-
-        mvprintw(y, x, "%s", txt);
-        refresh();
-
-        if(x le 50) {
-            dx = 1;
-        }
-
-        if(x ge (max_x - 5)) {
-            dx = -1;
-        }
-
-        x = x + dx;
-
-
-        usleep(16000*3);
-    }
-    endwin();
-    return 0;
-}
-\end{lstlisting}
-
-Powyższy kod to animacja wypisanego w terminalu słowa "hello" odbijającego się od krawędzi.\footnote{W przypadku braku animacji, rekomendowanym jest skorzystanie z programów posiadających wsparcie JavaScript, np. Adobe Acrobat Reader lub KDE Okular. W innym przypadku GIF z przykładem jest udostępniony jako załącznik do pracy.}
-
-
-\begin{figure}[h]
+\begin{figure}%[h]
     \centering
     % \includemovie{1cm}{1cm}{graf/przyklad-3-wynik.gif}
     \animategraphics[loop,autoplay,width=0.6\textwidth]{12}{graf/przyklad-3-wynik-}{0}{94}

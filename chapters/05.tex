@@ -37,6 +37,7 @@ BREAK: 'break' ;
 NEXT: 'next' ;
 RETURN: 'return' ;
         \end{lstlisting}
+    \newpage
     \item \textbf{operatory} - lecz również: nawiasy, przecinki
         \begin{lstlisting}[caption={Fragment listy operatorów i innych}]
 PLUS: '+' ;
@@ -173,38 +174,10 @@ Język \verb|Go| nie jest docelowo językiem obiektowym, natomiast można za jeg
 Kod kontekstu programu zawiera metody utrzymywania i tworzenia zakresów (ang. \textit{scope}) bloków programu. Dodatkowo kod zawiera struktury różnych typów zmiennych oraz funkcje pomocnicze odpowiadające za generowanie etykiet w odpowiednich miejsach w programie.
 
 %TODO: UML
-
-\begin{lstlisting}[caption={Struktury kontekstu kompilatora, zakresów oraz interfejs zmiennych}, label={lst:ok-kontekst}, morekeywords={type, string, interface, any, map}]
-
-type CompilerContext struct {
-	scopes *ScopeTree
-	currentScope *ScopeTree
-}
-
-type ScopeTree struct {
-	name string
-	children []*ScopeTree
-	parent *ScopeTree
-	vars map[string]ScopeItf
-	scopeType ScopeTreeType
-	currOff int
-}
-
-type ScopeItf interface {
-	Raw() any
-	Type() Type_
-	Offset() int
-}
-type ScopeFunc struct { id string; args []ScopeFuncArg; type_ Type_; isCache bool }
-type ScopeFuncArg struct { expr any; type_ Type_; idx int }
-type ScopeVar struct { expr any; type_ Type_; offset int }
-
-\end{lstlisting}
-%TODO: opis
-
 Zawarte w listingu \ref{lst:ok-kontekst} struktury \verb|CompilerConetxt| oraz \verb|ScopeTree| odpowiadają za utrzymanie zakresów zmiennych (i również funkcji) programu. \verb|ScopeTree| jest w reprezentowane za pomocą struktury danych drzewa. Natomiast struktury \verb|ScopeFunc|, \verb|ScopeFuncArg| oraz \verb|ScopeVar| implementują interfejs \verb|ScopeItf| i są odpowiedzialne za reprezentowanie zmiennych w drzewach zakresów.
 
 Zdefiniowane metody w listingu \ref{lst:ok-wybrane} to rekurencyjne funkcje pomagające odnaleźć się w odpowiednim miejscu drzewa zakresów. Dodatkowo opisano metody pomagające nazywać blocki i funkcje.
+\newpage
 \begin{itemize}
     \item \verb|GetScopeByName| - rekurencyjnie wyszukuje nazwy zakresu schodząc w dół drzewa.
     \item \verb|SearchIdUp| - wyszukuje rekurencyjnie identyfikatora w góre po nazwie identyfikatora. Metoda używana do znajdowania odpowiedniego zakresu zawierającego identyfikator, wymagane do sprawdzania poprzednio zainicjalizowanych zmiennych.

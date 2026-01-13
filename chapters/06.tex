@@ -27,7 +27,7 @@ Podczas implementacji kompilatora napotkano parę błędów, co jest naturalnym 
 W celu weryfikacji poprawności działania mechanizmu memoizacji języka przeprowadzono testy wydajnościowe, polegające na porównaniu czasu wykonania funkcji przed i po zastosowaniu memoizacji wykorzystując słowa kluczowe \verb|cache| oraz \verb|safe|. Do pomiaru czasu wykonania wykorzystano funkcję \verb|clock()| (z biblioteki standardowej języka C), która umożliwia określenie czasu procesora zużytego przez program. Uzyskane wartości pozwoliły na porównanie czasu wykonania fragmentu kodu oraz ocenę wpływu zastosowanego mechanizmu. Testowana funkcja zawiera kosztowne operacje wraz z efektami ubocznymi.
 
 
-\begin{lstlisting}[caption={Test mechanizmu memoizacji}]
+\begin{lstlisting}[caption={Test mechanizmu memoizacji}, morekeywords={func, cache, eq, str, ptr}]
 #include <bbuss/libc.bbuss>
 #include <bbuss/std.bbuss>
 #define CLOCKS_PER_SEC 1
