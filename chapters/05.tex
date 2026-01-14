@@ -9,11 +9,12 @@ Architektura kompilatora jest podzielona na dwie głowne części: część prze
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=1.1\textwidth]{graf/architektura.pdf}
+    \includegraphics[width=0.7\textwidth]{graf/architektura.pdf}
     \caption{Architektura kompilatora}
     \label{fig:arch}
 \end{figure}
 
+\newpage
 \section{Parser i lekser}
 
 Parser oraz lekser to istotne fragmenty frontendu kompilatora, odpowiedzialne za wstępne przetwarzanie kodu źródłowego. Moduły te zaimplementowane zostały za pomocą gramatyk formalnych narzędzia \verb|ANTLR|. W tym rozdziale szczegółowo zostaną opisane gramatyki formalne języka programowania w kontekście parsera i leksera, a także zastosowanie modułów w implementacji kompilatora.
@@ -144,9 +145,11 @@ func_call: SAFE? ID call_args ;
         \end{lstlisting}
 \end{itemize}
 
+\newpage
 \subsection{Zastosowanie w projekcie}
 
-Zastosowanie leksera i parsera w projekcie zachodzi w pliku wejściowym programu \verb|main.go| w funkcji \verb|run|. Poniższy kod został minimalnie zmodyfikowany w celu usunięcia zbędnych instrukcji w kontekście zastosowania leksera i parsera.
+W pliku \verb|main.go|, w funkcji \verb|run|, zaprezentowano praktyczne zastosowanie wygenerowanego przez narzędzie ANTLR leksera oraz parsera. Poniższy fragment kodu przedstawia sposób ich wykorzystania w projekcie. Fragment kodu został minimalnie zmodyfikowany w celu usunięcia zbędnych instrukcji niezwiązanych bezpośrednio z lekserem i parserem.
+
 
 \begin{lstlisting}[caption={Zastosowanie leksera i parsera w go}, label={lst:lp-go}]
 input := antlr.NewInputStream(string(stdin))
@@ -161,23 +164,21 @@ visitor := semantics.NewBlunderbussVisitor()
 visitor.Visit(tree)
 \end{lstlisting}
 
-Zawarty kod w listingu \ref{lst:lp-go} w linii 4 tworzy strumień tokenów za pomocą leksera, a następnie na podstawie strumienia tokenów tworzy parser. Za pomocą opisanej metody wizytora w rozdziale \ref{ch:02-analiza-leks-i-syntax} rozpoczyna się proces analizy semantycznej drzewa składniowego.
+Zawarty w listingu \ref{lst:lp-go} kod, w linii 4, tworzy strumień tokenów za pomocą leksera, a następnie na podstawie strumienia tokenów tworzy parser. Za pomocą opisanej metody wizytatora w rozdziale \ref{ch:02-analiza-leks-i-syntax} rozpoczyna się proces analizy semantycznej drzewa składniowego.
 
 \section{Organizacja kodu}
 
 Język \verb|Go| nie jest docelowo językiem obiektowym, natomiast można za jego pomocą wykorzystywać niektóre schematy programowania obiektowego. Poniżej przedstawiono diagram klas kompilatora.
 
-%TODO: UML
 
+\newpage
 \subsection{Kontekst programu}
 
 Kod kontekstu programu zawiera metody utrzymywania i tworzenia zakresów (ang. \textit{scope}) bloków programu. Dodatkowo kod zawiera struktury różnych typów zmiennych oraz funkcje pomocnicze odpowiadające za generowanie etykiet w odpowiednich miejsach w programie.
 
-%TODO: UML
-Zawarte w listingu \ref{lst:ok-kontekst} struktury \verb|CompilerConetxt| oraz \verb|ScopeTree| odpowiadają za utrzymanie zakresów zmiennych (i również funkcji) programu. \verb|ScopeTree| jest w reprezentowane za pomocą struktury danych drzewa. Natomiast struktury \verb|ScopeFunc|, \verb|ScopeFuncArg| oraz \verb|ScopeVar| implementują interfejs \verb|ScopeItf| i są odpowiedzialne za reprezentowanie zmiennych w drzewach zakresów.
+Zawarte w listingu \ref{lst:ok-kontekst} struktury \verb|CompilerConetxt| oraz \verb|ScopeTree| odpowiadają za utrzymanie zakresów zmiennych (i również funkcji) programu. \verb|ScopeTree| jest strukturą danych typu drzewo. Natomiast struktury \verb|ScopeFunc|, \verb|ScopeFuncArg| oraz \verb|ScopeVar| implementują interfejs \verb|ScopeItf| i są odpowiedzialne za reprezentowanie zmiennych w drzewach zakresów.
 
 Zdefiniowane metody w listingu \ref{lst:ok-wybrane} to rekurencyjne funkcje pomagające odnaleźć się w odpowiednim miejscu drzewa zakresów. Dodatkowo opisano metody pomagające nazywać blocki i funkcje.
-\newpage
 \begin{itemize}
     \item \verb|GetScopeByName| - rekurencyjnie wyszukuje nazwy zakresu schodząc w dół drzewa.
     \item \verb|SearchIdUp| - wyszukuje rekurencyjnie identyfikatora w góre po nazwie identyfikatora. Metoda używana do znajdowania odpowiedniego zakresu zawierającego identyfikator, wymagane do sprawdzania poprzednio zainicjalizowanych zmiennych.
@@ -189,7 +190,7 @@ Zdefiniowane metody w listingu \ref{lst:ok-wybrane} to rekurencyjne funkcje poma
 
 \subsection{Analiza semantyczna}
 
-Analiza semantyczna odbywa się w pliku źródłowym projektu \verb|semantics.go|, gdzie implementuje metody wizytora przechodzącego przez drzewo składniowe (AST). Metody wizytujące są oddelegowywane poprzez \verb|Visit|.
+Analiza semantyczna odbywa się w pliku źródłowym projektu \verb|semantics.go|, gdzie implementuje metody wizytatora przechodzącego przez drzewo składniowe (AST). Metody wizytujące są oddelegowywane poprzez \verb|Visit|.
 
 Odpowiednie metody zawarte w listingu \ref{lst:ok-visit} odzwierciedlają reguły parsera zdefiniowane w gramatykach formalnych (listing \ref{lst:reguly-parsera}).
 
@@ -217,6 +218,7 @@ Błędy w kontekście projektu dzielone są na dwie kategorie: parsera i kompila
 
 W celu zdefiniowania niestandardowego słuchacza (dalej ang. \textit{listener}) błędów, wymaganym jest usunięcie domyślnego listenera parsera dostarczanego przez narzędzie ANTLR. Podmiana listenerów oraz definicja znajdują się w listingu \ref{lst:err-parser}, gdzie błędy niepoprawnej składni są zbierane. W przypadku jakichkolwiek błędów, program się zatrzymuje oraz informuję użytkownika szczegółowym opisem błędu oraz jego lokalizacją w pliku tekstowym.
 
+\newpage
 \subsubsection{Błędy kompilatora}
 
 Błędy kompilatora zabierane są podczas analizy semantycznej i tak jak w przypadku błędów parsera, zatrzymują dalsze etapy programu oraz wypisują na standardowe wyjście znalezione błędy. W listingu \ref{lst:err-compiler} można znaleźć definicje błędów:
@@ -231,7 +233,7 @@ Błędy kompilatora zabierane są podczas analizy semantycznej i tak jak w przy
 
 \subsection{Standardowa biblioteka}
 
-Standardowa biblioteka jest zaimplementowana w języku \verb|Go| oraz jest kompilowana i instalowana wraz z implementowanym kompilatorem. Domyślnie zawiera wewnętrzne funkcje odpowiedzialne za memoizacje, lecz również jest to miejsce przeznaczone do definiowania innych przydatnych funkcji należących do standardu.
+Standardowa biblioteka jest zaimplementowana w języku \verb|Go| oraz jest kompilowana i instalowana wraz z implementowanym kompilatorem. Domyślnie zawiera wewnętrzne funkcje odpowiedzialne za memoizację, lecz również jest to miejsce przeznaczone do definiowania innych przydatnych funkcji należących do standardu.
 
 \subsubsection{Memoizacja}
 

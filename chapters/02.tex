@@ -1,7 +1,7 @@
 \chapter{Analiza tematu}
 \label{ch:02}
 
-Projektowanie oraz implementacja kompilatora wymaga zrozumienia jego podstawowych etapów przetwarzania programu źródłowego na kod wynikowy. Typowy kompilator składa się z kilku kroków, z których każdy pełni określoną funkcję w procesie kompilacji. Celem kompilatora jest zapewnienie, że sens kodu źródłowego jest w jak największym stopniu zachowany w momencie uruchomienia kodu wynikowego.
+Projektowanie oraz implementacja kompilatora wymaga zrozumienia jego podstawowych etapów przetwarzania programu źródłowego na kod wynikowy. Typowy kompilator składa się z kilku elementów, z których każdy pełni określoną funkcję w procesie kompilacji. Celem kompilatora jest zapewnienie, że sens kodu źródłowego jest w jak największym stopniu zachowany w momencie uruchomienia kodu wynikowego.
 
 
 \section{Badania literaturowe}
@@ -72,16 +72,16 @@ expr
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\textwidth]{graf/antlr4_aritm_expr.pdf}
+    \includegraphics[width=0.3\textwidth]{graf/antlr4_aritm_expr.pdf}
     \caption{Wygenerowane drzewo składniowe}
     \label{fig:aritm-ast}
 \end{figure}
 
 \newpage
 \subsection{Analiza semantyczna i generacja kodu wynikowego}
-Kolejnym etapem kompilacji jest analiza semantyczna, która polega na analizie drzewa składniowego (AST). Podczas tego kroku weryfikowane są reguły języka dotyczące typów danych, zakresów zmiennych, wywołań funkcji czy spójności programu \cite{bib:engineering-a-compiler}. Podczas tego procesu układana jest struktura programu, ustalane są zakresy zmiennych, sprawdzane odwołania do zdefiniowanych i niezdefiniowanych identyfikatorów oraz analizowane wyrażenia. Analize można przeprowadzić za pomocą wizytorów (visitors) lub listenerów. Wizytory pozwalają na rekurencyjne odwiedzanie węzłów drzewa składniowego i wykonywanie akcji semantycznych w punktach odpowiadających konkretnym regułom parsera. Listenery natomiast działają na zasadzie reakcji na wejście lub wyjście z węzłów drzewa - parser wykonuję odpowiednie metody listenera w momencie rozpoznania danej reguły parsera. Przykładowa analiza AST w postaci pseudokodu przeprowadzona została za pomocą wizytorów (rozwiązanie wykorzystane w implementacji projektu) na podstawie rysynku \ref{fig:aritm-ast}.
+Kolejnym etapem kompilacji jest analiza semantyczna, która polega na analizie drzewa składniowego (AST). Podczas tego kroku weryfikowane są reguły języka dotyczące typów danych, zakresów zmiennych, wywołań funkcji czy spójności programu \cite{bib:engineering-a-compiler}. Podczas tego procesu układana jest struktura programu, ustalane są zakresy zmiennych, sprawdzane odwołania do zdefiniowanych i niezdefiniowanych identyfikatorów oraz analizowane wyrażenia. Analizę można przeprowadzić za pomocą wizytatorów (ang \text{visitor}) lub słuchaczy (ang \textit{listener}). Wizytatory pozwalają na rekurencyjne odwiedzanie węzłów drzewa składniowego i wykonywanie akcji semantycznych w punktach odpowiadających konkretnym regułom parsera. Słuchacze natomiast działają na zasadzie reakcji na wejście lub wyjście z węzłów drzewa - parser wykonuję odpowiednie metody słuchacza w momencie rozpoznania danej reguły parsera. Przykładowa analiza AST w postaci pseudokodu przeprowadzona została za pomocą wizytatorów (rozwiązanie wykorzystane w implementacji projektu) na podstawie rysynku \ref{fig:aritm-ast}.
 
-\begin{lstlisting}[caption={Analiza semantyczna rysunku \ref{fig:aritm-ast}}, label={lst:sem-analysis}, morekeywords={null}]
+\begin{lstlisting}[caption={Analiza semantyczna rysunku drzewa składniowego z rysunku \ref{fig:aritm-ast}}, label={lst:sem-analysis}, morekeywords={null}]
 Visit(tree)
 
 if tree.all_expr == 2 and tree.PLUS != null {
@@ -101,19 +101,23 @@ Rekurencyjna funkcja odwiedzająca w listingu \ref{lst:sem-analysis} obsługuję
 
 Analiza semantyczna również wykrywa błędy, których nie da się wykryć podczas poprzednich etapów kompilacji, między innymi: błędy typów danych - niezgodność przypisania wyrażenia do zdefiniowanej zmiennej o innym typie, odwołania do zmiennych niezdefiniowanych lub poza zakresem, wywoływanie funkcji z niewłaściwą liczbą argumentów lub niewłaściwym typem argumentu.
 
+\newpage
 Etap analizy semantycznej często jest łączony z etapem generacji kodu wynikowego, który generuje instrukcje zrozumiałe dla maszyny na podstawie struktury programu \cite{bib:writing-c-compiler}. Instrukcje i ich format są zależne od docelowej platformy, na którą kod wynikowy jest generowany.
 
 \section{Podobne rozwiązania}
+
+Memoizacja to mechanizm optymalizacyjny, polegający na przechowywaniu wyników kosztownych obliczeń funkcji w pamięci, aby przy kolejnych wywoływaniach funkcji z tymi samymi argumentami zwracać zapamiętany wynik, zamiast ponownie go obliczać.
+
 Technika optymalizacyjna memoizacji funkcji jest stosowana we współczesnych językach programowania i kompilatorach. Poniższe rozwiązania korzystają z tej optymalizacji w różny sposób, jednak większość z nich używa zewnętrznych lub standardowych bibliotek. 
 
 Technika ta często wiązana jest z programowaniem funkcyjnym \cite{bib:haskell-functional-programming}, czyli paradygmatem, w którym podstawową jednostką konstrukcji programu są funkcje, a nie sekwencje instrukcji wpływających na stan. W programowaniu funkcyjnym nacisk kładzie się na wyrażanie obliczeń poprzez funkcje i ich kompozycję, a dane zwykle traktowane są jako niemodyfikowalne.
 
-Efekty uboczne w kontekście funckji to działania lub wyrażenia, które zmieniają stan programu lub jego otoczenie poza zwracanym wynikiem. Przykładami efektów ubocznych może być modyfikacja zmiennej globalnej, zapis do pliku, wypisywanie na ekranie lub wysyłanie zapytania sieciowego.
+Efekty uboczne w kontekście funkcji to działania lub wyrażenia, które zmieniają stan programu lub jego otoczenie poza zwracanym wynikiem. Przykładami efektów ubocznych może być modyfikacja zmiennej globalnej, zapis do pliku, wypisywanie na ekranie lub wysyłanie zapytania sieciowego.
 
 Funkcję których wynik zależy wyłącznie od jej argumentów i nie posiadają efektów ubocznych, nazywane są funkcjami czystymi. Oznacza to, że dla tych samych wartości wejściowych zawszę zwracany będzie ten sam wynik.
 
 \subsection{Clojure}
-Clojure jest dynamicznym językiem programowania ogólnego przeznaczenia stanowiącym dialekt języka LISP, który wspiera paradygmat programowania funkcyjnego oraz współbieżnego. Język ten został opracowany przez Richa Hickeya \cite{bib:clojure}, między innymi oferuje on wbudowane w język słowo kluczowe \textbf{memoize}, które zwraca nową funkcje, zapamiętującą wyniki wywołań dla danych argumentów. Mechanizm ten działa w czasie wykonywania programu i jest użyteczny w kontekscie programowania funkcyjnego.
+Clojure jest dynamicznym językiem programowania ogólnego przeznaczenia stanowiącym dialekt języka LISP, który wspiera paradygmat programowania funkcyjnego oraz współbieżnego. Język opracowany przez Richa Hickeya \cite{bib:clojure}, oferuje słowo kluczowe \textbf{memoize}, które zwraca nową funkcje, zapamiętującą wyniki wywołań dla danych argumentów. Mechanizm ten działa w czasie wykonywania programu i jest użyteczny w kontekscie programowania funkcyjnego.
 \subsection{Python}
 Python to interpretowany język programowania wysokiego poziomu ogólnego przeznaczenia posiadający rozbudowany pakiet bibliotek standardowych. Język ten został stworzony przez Guido van Rossum, a jego pierwsze wydanie ukazało się w 1991 roku. W standardowej bibliotece języka Python dostępny jest mechanizm memoizacji w postaci dekoratora \textbf{@functools.cache} - w tym kontekscie dekorator traktowany jest jako rozszerzenie funkcji, dodając do niej mechanizm pamięci podręcznej. Mechanizm \textbf{@functools.cache} działa w czasie wykonywania programu i jest przystosowany do pracy w środowisku wielowątkowym, a zastosowana pamięć podręczna jest bezpieczna wątkowo (thread-safe).
 \subsection{Memoizacja na poziomie programu}

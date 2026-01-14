@@ -1,7 +1,7 @@
 \chapter{Specyfikacja zewnętrzna}
 \label{ch:04}
 
-Zewnętrzna specyfikacja zawiera cenne informacje dla użytkowników kompilatora i języka programowania. Rozdział ten opisuje dokładnie wymagania niezbędne do poprawnego korzystania z kompilatora, instrukcje instalacji, instrukcje obsługi oraz przykłady działania programu.
+Specyfikacja zewnętrzna zawiera informacje dla użytkowników kompilatora i języka programowania. Rozdział ten opisuje dokładnie wymagania niezbędne do poprawnego korzystania z kompilatora, instrukcję instalacji, instrukcję obsługi oraz przykłady działania programu.
 
 \section{Wymagania sprzętowe i programowe}
 
@@ -11,6 +11,7 @@ Zaprojektowany kompilator przeznaczony jest do działania w środowisku systemó
 
 Istotnym elementem środowiska docelowego jest zastosowanie linuksowej konwencji wywołań języka C, znanej jako System V AMD64 ABI \cite{bib:system-v-amd64-abi}. Konwencja ta definiuje sposób przekazywania argumentów do funkcji, wykorzystanie rejestrów procesora, organizację stosu oraz zasady zwracania wartości.
 
+\newpage
 \subsection{Wymagania programowe}
 \label{ch:04-wymagania-programowe}
 
@@ -44,7 +45,7 @@ Implementacja projektu odbywa się głównie na systemie Arch Linux o architektu
     \break\verb|git clone https://github.com/sebasion/blunderbuss.git|
     \item Przejść do katalogu repozytorium.
     \break\verb|cd blunderbuss|
-    \item Następnym krokiem jest instalacja, dostarczony jest specjalny skrypt instalujący pozwalający na prostą instalację. Docelowe podkatalogi znajdują się w \verb|/opt|, dlatego potrzebne są uprawnienia administratora.
+    \item Następnym krokiem jest instalacja, przy użyciu dostarczonego skryptu instalacyjnego. Docelowe podkatalogi znajdują się w \verb|/opt|, dlatego potrzebne są uprawnienia administratora.
     \break\verb|sudo ./install.sh|
 
         Powyższy skrypt buduję pliki ze źródła, tworzy podkatalogi z odpowiednimi uprawnieniami, a następnie przenosi odpowiednie pliki.
@@ -60,13 +61,14 @@ install -m 0755 target/bbuss.bin "$PREFIX/bin/"
 install -m 0644 target/libstd.a "$PREFIX/lib"
 cp bbuss/lib/* "$PREFIX/include/bbuss"
 \end{lstlisting}
-    \item Ostatnim krokiem jest wyeksportowanie zmiennej środowiskowej ścieżki, aby utrwalić zmienną, zaleca się umieszczenie poniższego polecenia w pliku konfiguracyjnym powłoki (np. \verb|~/.bashrc| lub \verb|~/.zshrc|).
+    \item Ostatnim krokiem jest wyeksportowanie zmiennej środowiskowej "PATH", aby utrwalić zmienną, zaleca się umieszczenie poniższego polecenia w pliku konfiguracyjnym powłoki (np. \verb|~/.bashrc| lub \verb|~/.zshrc|).
     \break\verb|export PATH=/opt/bbuss/bin:$PATH|
 \end{enumerate}
 
+\newpage
 \section{Instrukcja obsługi}
 
-Ta instrukcja jest przeznaczony dla programistów korzystających z kompilatora oraz języka. W instrukcji omówiono strukturę katalogów instalacji kompilatora, proces jego wykorzystania oraz sposób pracy z językiem programowania.
+Ta instrukcja jest przeznaczona dla programistów korzystających opracowanego w ramach projektu języka "blunderbuss" oraz jego kompilatora. W instrukcji omówiono strukturę katalogów instalacji kompilatora, proces jego wykorzystania oraz sposób pracy z językiem programowania.
 
 \subsection{Kompilator}
 
@@ -81,11 +83,12 @@ Uruchamianie kompilatora, tak samo jak instalacja, odbywa się za pomocą wiersz
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.4\textwidth]{graf/git-repo-tree.pdf}
+    \includegraphics[width=0.3\textwidth]{graf/git-repo-tree.pdf}
     \caption{Struktura repozytorium}
     \label{fig:instr-git-tree}
 \end{figure}
 
+\newpage
 Katalog \verb|bbuss/examples| zawiera przykładowe kody źródłowe programów napisane w języku blunderbuss, z których można skorzystać.
 
 \begin{enumerate}
@@ -97,11 +100,11 @@ Katalog \verb|bbuss/examples| zawiera przykładowe kody źródłowe programów n
             \item \verb|-o| to opcjonalna flaga, wskazująca ścieżke wygenerowanego kodu asemblerowego. Do lokalizacji pliku wyjściowego wykorzystano katalog repozytorium \verb|target|.
             \item Flaga \verb|-I| jest wymagana i odpowiedzialna za ścieżkę do katalogu z plikami nagłówkowymi. Podczas instalacji, pliki nagłówkowe znajdującę sie w repozytorium zostały zainstalowane w katalogu \verb|/opt/bbuss/include|.
         \end{itemize}
-    \newpage
     \item Następnym krokiem jest użycie narzędzia \verb|nasm| aby przetworzyć wygenerowany kod asemblera do pliku obiektowego zawierającego kod maszynowy.
     \break\verb|nasm -f elf64 target/test.asm -o target/test.o|
     \break Fragment \verb|-f elf64| jest odpowiedzialny za wybór formatu ELF 64-bit, zgodnego z wymaganiami projektu.
-    \item Ostatnim etapem kompilacji jest wykorzystanie \verb|gcc| do złączenia plików zawierających kod maszynowy z bibliotekami.
+    \newpage
+    \item Ostatnim etapem kompilacji jest wykorzystanie \verb|gcc| do konsolidacji plików zawierających kod maszynowy z bibliotekami.
     \break\verb|gcc -no-pie target/test.o -L/opt/bbuss/lib -lstd -o target/test|
         \begin{itemize}
             \item \verb|-no-pie| to argument przekazywany linkerowi, który powoduje, że wynikowy program nie jest plikiem PIE, lecz tradycjnym plikiem binarnym o stałych adresach w pamięci. PIE (Position Independend Executable) to rodzaj pliku wykonywalnego, który może być załadowany w pamięci pod dowolnym adresem, dzięki temu system operacyjny może stosować mechanizmy bezpieczeństwa, zapobiegając np. atakom typu przepełnienie bufora (ang. \textit{buffer overflow}). 
@@ -115,13 +118,12 @@ Katalog \verb|bbuss/examples| zawiera przykładowe kody źródłowe programów n
 
 \subsection{Język programowania}
 
-Język programowanie \verb|blunderbuss| jest wzorowany na języku C, dlatego też niektóre fragmenty składni są podobne.
+Język programowania \verb|blunderbuss| jest wzorowany na języku C, dlatego też niektóre fragmenty składni są podobne.
 
 \subsubsection{Pliki nagłówkowe}
 
 Pliki nagłówkowe zawierają deklaracje funkcji bibliotek C (w tym np. glibc) lub biblioteki języka blunderbuss. Funkcje deklarowane są za pomocą słowa kluczowego \verb|extern|, poniżej przykładowe deklaracje.
 
-\newpage
 \begin{lstlisting}[caption={Deklaracje funkcji w pliku nagłówkowym}, label={lst:jp-header}, morekeywords={func, ptr, str}]
 extern func printf(str fmt, any msg) any {}
 extern func rand() int {}
@@ -131,7 +133,7 @@ extern func free(ptr p) ptr {}
 extern func clock() ptr {}
 \end{lstlisting}
 
-Następnie w pliku źródłowym zawierającym program, należy dołączyć pliki nagłowkowe.
+Następnie w pliku źródłowym zawierającym program, należy dołączyć pliki nagłówkowe.
 
 \begin{lstlisting}[caption={Dołączanie plików nagłówkowych}, label={lst:jp-header-include}]
 #include <bbuss/std.bbuss>
@@ -140,7 +142,7 @@ Następnie w pliku źródłowym zawierającym program, należy dołączyć pliki
 
 \subsubsection{Definicja i wywołanie funkcji}
 
-Definicja funkcji rozpoczyna się słowem kluczowym \verb|func|. Funkcja zawiera nazwę, zwracany typ, argumenty oraz blok instrukcji wykonywanych podczas wywoływania funkcji. W przypadku zwracania wartości, wykorzystane jest do tego słowo kluczowe \verb|return|. Przykładowa definicja:
+Definicja funkcji rozpoczyna się słowem kluczowym \verb|func|. Funkcja zawiera nazwę, zwracany typ, argumenty oraz blok instrukcji wykonywanych podczas wywoływania funkcji. W przypadku zwracania wartości, wykorzystane jest do tego słowo kluczowe \verb|return|.
 
 \begin{lstlisting}[caption={Definicja funkcji}, label={lst:jp-func}, morekeywords={func, str}]
 func test(int a, str b) int {
@@ -202,6 +204,7 @@ for(int i = 0; i lt 100; i = i + 1;) {
 
 Mechanizm memoizacji wymaga wstawienia słowa kluczowego \verb|cache| przed definicją funkcji oraz opcjonalnego użycia słowa kluczowego \verb|safe|, aby wykonać ciało funkcji zamiast tylko otrzymać zapisany wynik.
 
+\newpage
 \begin{lstlisting}[caption={Mechanizm memoizacji}, morekeywords={cache, func, safe}, label={lst:jp-memo}]
 cache func test(int a, int b) int {
     int result;
@@ -219,7 +222,7 @@ func main() int {
 }
 \end{lstlisting}
 
-Wywołanie funkcji przypisanej do zmiennej \verb|wynik1| w listingu \ref{lst:jp-memo}, wykona się cała funkcja \verb|test|, wyliczy wynik, wypiszę dane do pliku oraz dodatkowo zapiszę wynik w pamięci. Wywołanie \verb|wynik2| skorzysta z zapisanego wyniku i nie wykona żadnych instrukcji wywoływanej funkcji. Natomiast ostatnie wywołanie przypisane do zmiennej \verb|wynik3| ponownie wykona wszystkie instrukcję funkcji.
+Wywołanie funkcji przypisanej do zmiennej \verb|wynik1| w listingu \ref{lst:jp-memo}, wykona się cała funkcja \verb|test|, wyliczy wynik, wypiszę dane do pliku oraz dodatkowo zapiszę wynik w pamięci. Wywołanie \verb|wynik2| skorzysta z zapisanego wyniku i nie wykona żadnych instrukcji wywoływanej funkcji. Natomiast ostatnie wywołanie przypisane do zmiennej \verb|wynik3| ponownie wykona wszystkie instrukcje funkcji.
 
 \section{Przykłady działania}
 
@@ -276,15 +279,13 @@ Blunderbuss może korzystać również z innych bibliotek C, takich jak \verb|nc
 
 \subsubsection{raylib}
 
-Raylib to lekka, wieloplatformowa biblioteka graficzna napisana w języku C, przeznaczona do gier oraz aplikacji multimedialnych. Udostępnia prosty interfejs API do obsługi grafiki, dlatego dobrym wyborem dla implementowanego języka.
+Raylib to lekka, wieloplatformowa biblioteka graficzna napisana w języku C, przeznaczona do gier oraz aplikacji multimedialnych. Udostępnia prosty interfejs API do obsługi grafiki, dlatego jest dobrym wyborem dla implementowanego języka.
 
 \begin{lstlisting}[caption={Przykład biblioteki raylib}, morekeywords={ptr, eq}, label={lst:jp-przyklad2}]
 #include<bbuss/raylib.bbuss>
 #include<bbuss/std.bbuss>
 #include<bbuss/libc.bbuss>
 
-#define WHITE 16777215
-#define BLACK 0
 #define FPS 60
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -292,19 +293,20 @@ Raylib to lekka, wieloplatformowa biblioteka graficzna napisana w języku C, prz
 
 func main() int {
     ptr BLUE = ColorFromInt(0, 0, 255); 
-    ptr RED = ColorFromInt(255, 0, 0);
+    ptr GRAY = ColorFromInt(180, 180, 180);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "hello");
     SetTargetFPS(FPS);
     for(int i = WindowShouldClose(); i eq 0; i = WindowShouldClose();) {
         BeginDrawing();
-        ClearBackground(RED);
-        DrawText("Witam w programie napisanym w raylib!", 200, 200, 20, BLUE);
+        ClearBackground(GRAY);
+        DrawText("Witam w programie napisanym w raylib!", 100, 200, 35, BLUE);
         EndDrawing();
     }
 
     CloseWindow();
     return 0;
 }
+
 \end{lstlisting}
 
 \newpage
@@ -312,7 +314,7 @@ Przykład biblioteki \verb|raylib| zawarty w listingu \ref{lst:jp-przyklad2} kor
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{graf/przyklad-2-wynik.pdf}
+    \includegraphics[width=0.5\textwidth]{graf/przyklad-2-wynik.pdf}
     \caption{Okno narysowane za pomocą biblioteki raylib}
     \label{fig:jp-przyklad2-wynik}
 \end{figure}

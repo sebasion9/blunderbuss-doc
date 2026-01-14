@@ -25,7 +25,7 @@ Programista musi mieć możliwość zdefiniowania funkcji. Wymagane jest zdefin
 
 \subsection{Możliwość memoizacji funkcji czystych}
 
-Programista musi móc opisać definicję funkcji jako funkcję korzystającą z memoizacji używając słowa kluczowego \verb|cache|. Dodatkowo programista musi mieć możliwość wyboru w którym momencie wywoływana funkcja skorzysta z mechanizmu memoizacji lub wykona ciało funkcji. Wybór skorzystania z zapisanych wyników odbywa się za pomocą słowa kluczowego \verb|safe|.
+Programista musi móc opisać definicję funkcji jako funkcję korzystającą z memoizacji używając słowa kluczowego \verb|cache|. Dodatkowo programista musi mieć możliwość wyboru, w którym momencie wywoływana funkcja skorzysta z mechanizmu memoizacji lub wykona ciało funkcji. Wybór skorzystania z zapisanych wyników odbywa się za pomocą słowa kluczowego \verb|safe|.
 
 \subsection{Obsługa instrukcji sterujących}
 
@@ -72,7 +72,7 @@ Kompilator powinien zarządzać zapisywaniem wyników funkcji czystych. Odbywa s
 
 \subsection{Czytelność błędów}
 
-Kompilator powinien informować programiste za pomocą czytelnych błędów kompilacyjnych oraz odpowiednio przerywać proces na różnych etapach kompilacji (lekser, parser, analiza semantyczna).
+Kompilator powinien informować programistę za pomocą czytelnych błędów kompilacyjnych oraz odpowiednio przerywać proces na różnych etapach kompilacji (lekser, parser, analiza semantyczna).
 
 \subsection{Czytelność składni}
 
@@ -85,7 +85,7 @@ Wynikowy program jest ograniczony systemem operacyjnym i architekturą procesora
 
 \section{Narzędzia}
 
-Do zaimplementowania projektu skorzystano z wielu publicznych, open-source narzędzi idealnie dopasowanych do wymagań projektu.
+Do zaimplementowania projektu skorzystano z wielu publicznych, otwartych narzędzi idealnie dopasowanych do wymagań projektu.
 
 \subsection{Narzędzia głowne}
 
@@ -93,7 +93,7 @@ Implementacja kompilatora opiera się na zestawie podstawowych, powszechnie stos
 
 \subsubsection{ANTLR} % metody eksperymentalne, rozwijanie gramatyk, 04 -> generacja api antlera do .go
 
-ANTLR (ANother Tool for Language Recognition) jest wyjątkowo rozbudowanym i elastycznym narzędziem do parsowania języków formalnych \cite{bib:antlr}. Implementowany projekt odnosił korzyści z ANTLR w kontekście parsowania kodu źródłowego we wszystkich etapach kompilacji: analiza leksykalna (tokenizacja) i analiza składniowa (parser), a następnie odwiedzanie węzłów drzewa składniowego (analiza semantyczna). Jedną z największych zalet ANTLR jest generacja interfejsu programistycznego (dalej API\footnote{API (Application Programming Interface) - interfejs programistyczny umożliwiający komunikację oraz współdziałanie pomiędzy różnymi komponentami oprogramowania lub systemami informatycznymi}) w jednym z dostępnych języków a wygenerowany kod parsera jest optymalny i stabilny. ANTLR domyślnie generuje kod parsera w języku Java. Jednak docelowy język można zmienić za pomocą parametru \verb|-Dlanguage|, który pozwala na wygenerowanie kodu w innym obsługiwanym języku, na przykład \verb|Go|. Przykładowe prototypowania za pomocą ANTLR (na przykładowej gramatyce "Arithm") wygląda następująco:
+ANTLR (ANother Tool for Language Recognition) jest wyjątkowo rozbudowanym i elastycznym narzędziem do parsowania języków formalnych \cite{bib:antlr}. Implementowany projekt odnosił korzyści z ANTLR w kontekście parsowania kodu źródłowego we wszystkich etapach kompilacji: analiza leksykalna (tokenizacja) i analiza składniowa (parser), a następnie odwiedzanie węzłów drzewa składniowego (analiza semantyczna). Jedną z największych zalet ANTLR jest generacja interfejsu programistycznego (dalej API\footnote{API (Application Programming Interface) - interfejs programistyczny umożliwiający komunikację oraz współdziałanie pomiędzy różnymi komponentami oprogramowania lub systemami informatycznymi}) w jednym z dostępnych języków a wygenerowany kod parsera jest zoptymalizowany i stabilny. ANTLR domyślnie generuje kod parsera w języku Java. Jednak docelowy język można zmienić za pomocą parametru \verb|-Dlanguage|, który pozwala na wygenerowanie kodu w innym obsługiwanym języku, na przykład \verb|Go|. Przykładowe prototypowania za pomocą ANTLR (na przykładowej gramatyce "Arithm") wygląda następująco:
 
 \begin{lstlisting}[caption={Prototypowanie za pomocą ANTLR}, label={lst:antlr-prot}]
 antlr4 Arithm.g4
@@ -130,12 +130,12 @@ Color ColorFromInt(int r, int g, int b) {
 
 \subsubsection{NASM}
 
-NASM (Netwide Assembler) to open-source asembler i disasembler dla procesorów o architekturze x86, pozwalający programistom generować pliki obiektowe na podstawie kodu asemblera. 
+NASM (Netwide Assembler) to dostępny na licencji open-source asembler i disasembler dla procesorów o architekturze x86, pozwalający programistom generować pliki obiektowe na podstawie kodu asemblera. 
 
 
 \subsubsection{GCC} % asm -> bin, preprocesor
 
-GCC (GNU Compiler Collection) \cite{bib:gcc} to open-source zestaw kompilatorów dla różnych języków programowania, w tym C, C++. Kompilator ten oprócz kompilowania języków, jest w stanie linkować (pol \textit{łączyć}) w celu utworzenia końcowego programu. GCC charakteryzuje się wysoką wydajnością, wsparciem dla standardów językowych oraz optymalizacjami kodu.
+GCC (GNU Compiler Collection) \cite{bib:gcc} to dostępny na licencji open-source zestaw kompilatorów dla różnych języków programowania, w tym C, C++. Kompilator ten oprócz kompilowania języków, jest w stanie konsolidować (ang \textit{linkować}) w celu utworzenia końcowego programu. GCC charakteryzuje się wysoką wydajnością, wsparciem dla standardów językowych oraz optymalizacjami kodu.
 
 GCC to kluczowe narzędzie, niezbędne do przepływu kompilacji implementowanego języka programowania. W kontekście projektu odpowiedzialny jest za preprocesowanie kodu źródłowego a następnie linkowanie z biblioteką standardową oraz glibc.
 
@@ -145,11 +145,11 @@ Podczas wstępnego prototypowania oraz rozwijania kompilatora, wykorzystywane by
 
 \subsubsection{ld}
 
-\verb|ld| jest standardowym linkerem w systemach Unix/Linux, który odpowiada za linkowanie plików obiektowych oraz bibliotek w końcowy program wykonywalny. W praktyce korzystanie bezpośrednio z ld okazało się problematyczne, ponieważ wymagało ręcznego podawania wszystkich opcji linkowania oraz ścieżek do bibliotek. Alternatywą stało się GCC, które jest wygodniejsze i prostsze do używania.
+\verb|ld| jest standardowym linkerem w systemach Unix/Linux, który odpowiada za linkowanie plików obiektowych oraz bibliotek w końcowy program wykonywalny. W praktyce, korzystanie bezpośrednio z ld okazało się problematyczne, ponieważ wymagało ręcznego podawania wszystkich opcji linkowania oraz ścieżek do bibliotek. Alternatywą stało się GCC, które jest wygodniejsze i prostsze w użyciu.
 
 \subsection{Narzędzia do rozwoju oprogramowania}
 
-Istotnym elementem implementacji, są narzędzia za pomocą których rozwijane jest oprogramowanie, ponieważ w pewnym stopniu wpływają one na proces tworzenia kodu i są jednocześnie ograniczane przez inne narzędzia w ekosystemie.
+Istotnym elementem implementacji, są narzędzia, za pomocą których rozwijane jest oprogramowanie, ponieważ w pewnym stopniu wpływają one na proces tworzenia kodu i są jednocześnie ograniczane przez inne narzędzia w ekosystemie.
 
 \subsubsection{Środowisko do edycji kodu źródłowego}
 
