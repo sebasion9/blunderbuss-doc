@@ -81,7 +81,7 @@ expr
 \subsection{Analiza semantyczna i generacja kodu wynikowego}
 Kolejnym etapem kompilacji jest analiza semantyczna, która polega na analizie drzewa składniowego (AST). Podczas tego kroku weryfikowane są reguły języka dotyczące typów danych, zakresów zmiennych, wywołań funkcji czy spójności programu \cite{bib:engineering-a-compiler}. Podczas tego procesu układana jest struktura programu, ustalane są zakresy zmiennych, sprawdzane odwołania do zdefiniowanych i niezdefiniowanych identyfikatorów oraz analizowane wyrażenia. Analizę można przeprowadzić za pomocą wizytatorów (ang \text{visitor}) lub słuchaczy (ang \textit{listener}). Wizytatory pozwalają na rekurencyjne odwiedzanie węzłów drzewa składniowego i wykonywanie akcji semantycznych w punktach odpowiadających konkretnym regułom parsera. Słuchacze natomiast działają na zasadzie reakcji na wejście lub wyjście z węzłów drzewa - parser wykonuję odpowiednie metody słuchacza w momencie rozpoznania danej reguły parsera. Przykładowa analiza AST w postaci pseudokodu przeprowadzona została za pomocą wizytatorów (rozwiązanie wykorzystane w implementacji projektu) na podstawie rysynku \ref{fig:aritm-ast}.
 
-\begin{lstlisting}[caption={Analiza semantyczna rysunku drzewa składniowego z rysunku \ref{fig:aritm-ast}}, label={lst:sem-analysis}, morekeywords={null}]
+\begin{lstlisting}[caption={Analiza semantyczna drzewa składniowego z rysunku \ref{fig:aritm-ast}}, label={lst:sem-analysis}, morekeywords={null}]
 Visit(tree)
 
 if tree.all_expr == 2 and tree.PLUS != null {
