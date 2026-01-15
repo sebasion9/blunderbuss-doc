@@ -24,7 +24,7 @@ Poniższe oprogramowanie jest wymagane do prawidłowej instalacji i działania k
     \item Git
 \end{itemize}
 
-Zależnie od dystrybucji systemu Linux, narzędzia te można zainstalować za pomocą menadżera pakietów odpowiednio dla każdej dystrybucji, takich jak: \verb|apt|, \verb|pacman| czy \verb|dnf|. W przypadku gdy wersja oprogramowania zainstalowanego za pomocą menadżera pakietów się nie zgadza lub jest za niska, zalecanym jest zainstalowanie w oprogramowania w odpowiedniej wersji z innych źródeł.
+Zależnie od dystrybucji systemu Linux, narzędzia te można zainstalować za pomocą menadżera pakietów odpowiednio dla każdej dystrybucji, takich jak: \verb|apt|, \verb|pacman| czy \verb|dnf|. W przypadku, gdy wersja oprogramowania zainstalowanego za pomocą menadżera pakietów się nie zgadza lub jest za niska, zalecane jest zainstalowanie oprogramowania w odpowiedniej wersji z innych źródeł.
 
 \section{Instalacja}
 \label{ch:04-instalacja}
@@ -35,7 +35,7 @@ Implementacja projektu odbywa się głównie na systemie Arch Linux o architektu
 \begin{enumerate}
     \raggedright
     \item Należy zainstalować potrzebne narzędzia oraz pakiety znajdujące się w podrozdziale \ref{ch:04-wymagania-programowe}.
-    \item Sprawdzić wersje zainstalowanych narzędzi. W przypadku niepoprawnej instalacji działanie kompilatora może zakończyć się sukcesem, natomiast nie jest to gwarantowane.
+    \item Sprawdzić wersje zainstalowanych narzędzi. W przypadku niepoprawnej instalacji poprawne działanie kompilatora nie jest gwarantowane.
     \break\verb|nasm -v|
     \break\verb|gcc -v|
     \break\verb|go version|
@@ -45,10 +45,10 @@ Implementacja projektu odbywa się głównie na systemie Arch Linux o architektu
     \break\verb|git clone https://github.com/sebasion/blunderbuss.git|
     \item Przejść do katalogu repozytorium.
     \break\verb|cd blunderbuss|
-    \item Następnym krokiem jest instalacja, przy użyciu dostarczonego skryptu instalacyjnego. Docelowe podkatalogi znajdują się w \verb|/opt|, dlatego potrzebne są uprawnienia administratora.
+    \item Następnym krokiem jest instalacja, przy użyciu dostarczonego skryptu instalacyjnego. Docelowe podkatalogi znajdują się w \verb|/opt|, dlatego konieczne są uprawnienia administratora.
     \break\verb|sudo ./install.sh|
 
-        Powyższy skrypt buduję pliki ze źródła, tworzy podkatalogi z odpowiednimi uprawnieniami, a następnie przenosi odpowiednie pliki.
+        Powyższy skrypt buduje pliki ze źródła, tworzy podkatalogi z odpowiednimi uprawnieniami, a następnie przenosi odpowiednie pliki.
 \begin{lstlisting}[caption={Fragment skryptu instalującego}, label={lst:install-script}]
 PREFIX=${PREFIX:-/opt/bbuss}
 go build -o target/bbuss ./cmd
@@ -68,7 +68,7 @@ cp bbuss/lib/* "$PREFIX/include/bbuss"
 \newpage
 \section{Instrukcja obsługi}
 
-Ta instrukcja jest przeznaczona dla programistów korzystających opracowanego w ramach projektu języka "blunderbuss" oraz jego kompilatora. W instrukcji omówiono strukturę katalogów instalacji kompilatora, proces jego wykorzystania oraz sposób pracy z językiem programowania.
+Niniejsza instrukcja jest przeznaczona dla programistów korzystających opracowanego w ramach projektu języka "blunderbuss" oraz jego kompilatora. W instrukcji omówiono strukturę katalogów instalacji kompilatora, proces jego wykorzystania oraz sposób pracy z językiem programowania.
 
 \subsection{Kompilator}
 
@@ -79,7 +79,7 @@ Skrypt instalacyjny tworzy trzy katalogi istotne do korzystania z języka progra
     \item Katalog \verb|/opt/bbuss/include/bbuss/| zawiera wszystkie pliki nagłówkowe wymagane na etapie preprocesowania oraz kompilacji napisanych programów.
 \end{enumerate}
 
-Uruchamianie kompilatora, tak samo jak instalacja, odbywa się za pomocą wiersza poleceń. Poniżej przedstawiono ogólny przykład korzystania z kompilatora, który obejmuję jego wszystkie funkcjonalności. Zakładając, że użytkownik nadal znajduję się w katalogu repozytorium \verb|blunderbuss| z punktu \ref{ch:04-instalacja}.
+Uruchamianie kompilatora, tak samo jak instalacja, odbywa się za pomocą wiersza poleceń. Poniżej przedstawiono ogólny przykład korzystania z kompilatora, który obejmuje jego wszystkie funkcjonalności. Zakładając, że użytkownik nadal znajduje się w katalogu repozytorium \verb|blunderbuss| z punktu \ref{ch:04-instalacja}.
 
 \begin{figure}[h]
     \centering
@@ -96,21 +96,21 @@ Katalog \verb|bbuss/examples| zawiera przykładowe kody źródłowe programów n
     \item Kompilacja pliku z kodem źródłowym do kodu asemblera za pomocą kompilatora.
     \break\verb|bbuss -i bbuss/examples/test.bbuss -o target/test.asm -I /opt/bbuss/include|
         \begin{itemize}
-            \item Flaga \verb|-i| oczekuję pliku źródłowego programu oraz jest wymagana, w tym przypadku skorzystano z przykładu znajdującym się w katalogu repozytorium (rysunek \ref{fig:instr-git-tree}) \verb|bbuss/examples|.
-            \item \verb|-o| to opcjonalna flaga, wskazująca ścieżke wygenerowanego kodu asemblerowego. Do lokalizacji pliku wyjściowego wykorzystano katalog repozytorium \verb|target|.
+            \item Flaga \verb|-i| oczekuje pliku źródłowego programu oraz jest wymagana, w tym przypadku skorzystano z przykładu znajdującym się w katalogu repozytorium (rysunek \ref{fig:instr-git-tree}) \verb|bbuss/examples|.
+            \item \verb|-o| to opcjonalna flaga, wskazująca ścieżkę wygenerowanego kodu asemblerowego. Do lokalizacji pliku wyjściowego wykorzystano katalog repozytorium \verb|target|.
             \item Flaga \verb|-I| jest wymagana i odpowiedzialna za ścieżkę do katalogu z plikami nagłówkowymi. Podczas instalacji, pliki nagłówkowe znajdującę sie w repozytorium zostały zainstalowane w katalogu \verb|/opt/bbuss/include|.
         \end{itemize}
-    \item Następnym krokiem jest użycie narzędzia \verb|nasm| aby przetworzyć wygenerowany kod asemblera do pliku obiektowego zawierającego kod maszynowy.
+    \item Następnym krokiem jest użycie narzędzia \verb|nasm|, aby przetworzyć wygenerowany kod asemblera do pliku obiektowego zawierającego kod maszynowy.
     \break\verb|nasm -f elf64 target/test.asm -o target/test.o|
     \break Fragment \verb|-f elf64| jest odpowiedzialny za wybór formatu ELF 64-bit, zgodnego z wymaganiami projektu.
     \newpage
     \item Ostatnim etapem kompilacji jest wykorzystanie \verb|gcc| do konsolidacji plików zawierających kod maszynowy z bibliotekami.
     \break\verb|gcc -no-pie target/test.o -L/opt/bbuss/lib -lstd -o target/test|
         \begin{itemize}
-            \item \verb|-no-pie| to argument przekazywany konsolidatorowi, który powoduje, że wynikowy program nie jest plikiem PIE, lecz tradycjnym plikiem binarnym o stałych adresach w pamięci. PIE (Position Independend Executable) to rodzaj pliku wykonywalnego, który może być załadowany w pamięci pod dowolnym adresem, dzięki temu system operacyjny może stosować mechanizmy bezpieczeństwa, zapobiegając np. atakom typu przepełnienie bufora (ang. \textit{buffer overflow}). 
+            \item \verb|-no-pie| to argument przekazywany konsolidatorowi, który powoduje, że wynikowy program nie jest plikiem PIE, lecz tradycyjnym plikiem binarnym o stałych adresach w pamięci. PIE (Position Independend Executable) to rodzaj pliku wykonywalnego, który może być załadowany w pamięci pod dowolnym adresem, dzięki czemu system operacyjny może stosować mechanizmy bezpieczeństwa, zapobiegając np. atakom typu przepełnienie bufora (ang. \textit{buffer overflow}). 
             \item Flaga \verb|-L| jest odpowiedzialna za dodanie katalogu \verb|/opt/bbuss/lib| do listy miejsc, w których linker szuka bibliotek.
             \item \verb|-lstd| a dokładniej \verb|-l<nazwa>| przekazuje konsolidatorowi nazwę biblioteki, którą ma dodatkowo skonsolidować (oprócz np. domyślnej biblioteki glibc). Wzorzec szukanych bibliotek wygląda następująco \verb|lib<nazwa>.a| lub \verb|lib<nazwa>.so|. Zainstalowana standardowa biblioteka istnieje w katalogu pod nazwą \verb|libstd.a|.
-            \item Finalnie, argument \verb|-o| wskazuje ścieżkę wynikowego programu wykonywalnego.
+            \item Ostatecznie, argument \verb|-o| wskazuje ścieżkę wynikowego programu wykonywalnego.
         \end{itemize}
     \item Ostatnim krokiem jest uruchomienie programu wynikowego.
     \break\verb|./target/test|
@@ -154,7 +154,7 @@ Wywołanie funkcji, czyli wykonanie wszystkich instrukcji w ciele funkcji, odbyw
 
 \subsubsection{Instrukcja warunkowa}
 
-Instrukcja warunkowa wykorzystuję trzy słowa kluczowe: \verb|if|, \verb|else| oraz \verb|elseif|. Zawarte warunki w instrukcji warunkowej mogą korzystać z operatorów arytmetycznych i logicznych. Język nie posiada typu "boolean", dlatego liczba "0" jest traktowana jako fałsz, a wszystkie inne jako prawda.
+Instrukcja warunkowa wykorzystuje trzy słowa kluczowe: \verb|if|, \verb|else| oraz \verb|elseif|. Zawarte warunki w instrukcji warunkowej mogą korzystać z operatorów arytmetycznych i logicznych. Język nie posiada typu "boolean", dlatego liczba "0" jest traktowana jako fałsz, a wszystkie inne jako prawda.
 
 Lista operatorów:
 \begin{itemize}
@@ -169,7 +169,7 @@ Lista operatorów:
     \item \verb|%| - operator reszty z dzielenia (ang. \textit{modulo})
 \end{itemize}
 
-Przykład kodu źródłowego, który wykorzystuje instrukcję warunkowe:
+Przykład kodu źródłowego, który wykorzystuje instrukcje warunkowe:
 
 \begin{lstlisting}[caption={Instrukcja warunkowa}, label={lst:jp-if}, morekeywords={elseif, eq}]
 if(prod eq 11) {
@@ -207,7 +207,7 @@ Mechanizm memoizacji wymaga wstawienia słowa kluczowego \verb|cache| przed defi
 \begin{lstlisting}[caption={Mechanizm memoizacji}, morekeywords={cache, func, safe}, label={lst:jp-memo}]
 cache func test(int a, int b) int {
     int result;
-    /* inne instrukcje wyliczajace wynik */
+    /* inne instrukcje */
     /* efekty uboczne, np. pisanie do pliku */
     result = a + b * b;
     return result;
@@ -221,7 +221,7 @@ func main() int {
 }
 \end{lstlisting}
 
-Wywołanie funkcji przypisanej do zmiennej \verb|wynik1| w listingu \ref{lst:jp-memo}, wykona się cała funkcja \verb|test|, wyliczy wynik, wypiszę dane do pliku oraz dodatkowo zapiszę wynik w pamięci. Wywołanie \verb|wynik2| skorzysta z zapisanego wyniku i nie wykona żadnych instrukcji wywoływanej funkcji. Natomiast ostatnie wywołanie przypisane do zmiennej \verb|wynik3| ponownie wykona wszystkie instrukcje funkcji.
+Wywołanie funkcji przypisanej do zmiennej \verb|wynik1| w listingu \ref{lst:jp-memo}, wykona się cała funkcja \verb|test|, wyliczy wynik, wypisze dane do pliku oraz dodatkowo zapisze wynik w pamięci. Wywołanie \verb|wynik2| skorzysta z zapisanego wyniku i nie wykona żadnych instrukcji wywoływanej funkcji. Natomiast ostatnie wywołanie przypisane do zmiennej \verb|wynik3| ponownie wykona wszystkie instrukcje funkcji.
 
 \section{Przykłady działania}
 
@@ -236,7 +236,7 @@ W tym przykładzie zastosowano funkcje dostarczone przez bibliotekę glibc, taki
 #include<bbuss/libc.bbuss>
 #include<bbuss/std.bbuss>
 
-/* fragment zawartosci plikow libc.bbuss i std.bbuss */
+/* fragment libc.bbuss i std.bbuss */
 extern func rand() int {}
 extern func malloc(int size) ptr {}
 extern func PrintlnInt(int arg) any {}

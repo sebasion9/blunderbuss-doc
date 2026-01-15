@@ -1,7 +1,7 @@
 \chapter{Wymagania i narzędzia}
 \label{ch:wymagania-i-narzedzia}
 
-Wymagania określają zakres możliwości zaprojektowanego języka programowania oraz założenia dotyczące jego implementacji. Narzędzia zostały wybrane tak, aby jak najdokładniej spełnić wymagania podczas implementacji.
+Wymagania określają zakres możliwości zaprojektowanego języka programowania oraz założenia dotyczące jego implementacji. Narzędzia zostały wybrane tak, aby najbardziej precyzyjnie spełnić wymagania podczas implementacji.
 
 \section{Wymagania funkcjonalne}
 
@@ -51,7 +51,7 @@ Programista musi mieć możliwość korzystania z kilku podstawowych typów:
 \end{itemize}
 \subsection{Możliwość dołączania zewnętrznych bibliotek C}
 
-Programista musi mieć możliwość dołączania zewnętrznych bibliotek C, na przykład bibliotek matematycznych, bibliotek graficznych lub konkretnie glibc. Dołączanie bibliotek otwiera wiele możliwych ścieżek i znacznie ułatwia korzystanie z języka używając funkcji takich jak \verb|malloc| lub \verb|printf|. 
+Programista musi mieć możliwość dołączania zewnętrznych bibliotek C, na przykład bibliotek matematycznych, bibliotek graficznych lub konkretnie glibc. Dołączanie bibliotek otwiera wiele ścieżek i znacznie ułatwia korzystanie z języka używając funkcji takich jak \verb|malloc| lub \verb|printf|. 
 
 \section{Wymagania niefunkcjonalne}
 
@@ -75,7 +75,7 @@ Kompilator powinien informować programistę za pomocą czytelnych błędów kom
 
 \subsection{Czytelność składni}
 
-Składnia powinna być czytelna, zrozumiała i nieskomplikowana, tak aby nie zajmowała programiście wiele czasu na naukę.
+Składnia powinna być czytelna, zrozumiała i nieskomplikowana, tak aby programista nie poświęcał zbyt wiele czasu na naukę.
 
 \newpage
 \subsection{Ograniczenia platformowe}
@@ -84,15 +84,15 @@ Wynikowy program jest ograniczony systemem operacyjnym i architekturą procesora
 
 \section{Narzędzia}
 
-Do zaimplementowania projektu skorzystano z wielu publicznych, otwartych narzędzi idealnie dopasowanych do wymagań projektu.
+Do zaimplementowania projektu korzystano z wielu publicznych, otwartych narzędzi idealnie dopasowanych do wymagań projektu.
 
-\subsection{Narzędzia głowne}
+\subsection{Narzędzia główne}
 
 Implementacja kompilatora opiera się na zestawie podstawowych, powszechnie stosowanych narzędzi środowiska programistycznego.
 
 \subsubsection{ANTLR} % metody eksperymentalne, rozwijanie gramatyk, 04 -> generacja api antlera do .go
 
-ANTLR (ANother Tool for Language Recognition) jest wyjątkowo rozbudowanym i elastycznym narzędziem do parsowania języków formalnych \cite{bib:antlr}. Implementowany projekt odnosił korzyści z ANTLR w kontekście parsowania kodu źródłowego we wszystkich etapach kompilacji: analiza leksykalna (tokenizacja) i analiza składniowa (parser), a następnie odwiedzanie węzłów drzewa składniowego (analiza semantyczna). Jedną z największych zalet ANTLR jest generacja interfejsu programistycznego (dalej API\footnote{API (Application Programming Interface) - interfejs programistyczny umożliwiający komunikację oraz współdziałanie pomiędzy różnymi komponentami oprogramowania lub systemami informatycznymi}) w jednym z dostępnych języków a wygenerowany kod parsera jest zoptymalizowany i stabilny. ANTLR domyślnie generuje kod parsera w języku Java. Jednak docelowy język można zmienić za pomocą parametru \verb|-Dlanguage|, który pozwala na wygenerowanie kodu w innym obsługiwanym języku, na przykład \verb|Go|. Przykładowe prototypowania za pomocą ANTLR (na przykładowej gramatyce "Arithm") wygląda następująco:
+ANTLR (ANother Tool for Language Recognition) jest wyjątkowo rozbudowanym i elastycznym narzędziem do parsowania języków formalnych \cite{bib:antlr}. Implementowany projekt odnosił korzyści z ANTLR w kontekście parsowania kodu źródłowego we wszystkich etapach kompilacji: analiza leksykalna (tokenizacja) i analiza składniowa (parser), a następnie odwiedzanie węzłów drzewa składniowego (analiza semantyczna). Jedną z największych zalet ANTLR jest generacja interfejsu programistycznego (dalej API\footnote{API (Application Programming Interface) - interfejs programistyczny umożliwiający komunikację oraz współdziałanie pomiędzy różnymi komponentami oprogramowania lub systemami informatycznymi}) w jednym z dostępnych języków a wygenerowany kod parsera jest zoptymalizowany i stabilny. ANTLR domyślnie generuje kod parsera w języku Java. Jednak docelowy język można zmienić za pomocą parametru \verb|-Dlanguage|, który pozwala na wygenerowanie kodu w innym obsługiwanym języku, na przykład \verb|Go|. Przykładowe prototypowanie za pomocą ANTLR (na przykładowej gramatyce "Arithm") wygląda następująco:
 
 \begin{lstlisting}[caption={Prototypowanie za pomocą ANTLR}, label={lst:antlr-prot}]
 antlr4 Arithm.g4
@@ -140,7 +140,7 @@ GCC to kluczowe narzędzie, niezbędne w przepływie kompilacji implementowanego
 
 \subsection{Metody eksperymentalne}
 
-Podczas wstępnego prototypowania oraz rozwijania kompilatora, wykorzystywane były inne narzędzia niż docelowe. Warto zaznaczyć ten proces, ponieważ pozwalał on na szybkie testowanie pomysłów.
+Podczas wstępnego prototypowania oraz rozwijania kompilatora, wykorzystywane były inne narzędzia niż docelowe. Warto zaznaczyć ten proces, ponieważ pozwolił on na szybkie testowanie pomysłów.
 
 \subsubsection{ld}
 
@@ -148,7 +148,7 @@ Podczas wstępnego prototypowania oraz rozwijania kompilatora, wykorzystywane by
 
 \subsection{Narzędzia do rozwoju oprogramowania}
 
-Istotnym elementem implementacji, są narzędzia, za pomocą których rozwijane jest oprogramowanie, ponieważ w pewnym stopniu wpływają one na proces tworzenia kodu i są jednocześnie ograniczane przez inne narzędzia w ekosystemie.
+Istotnym elementem implementacji, są narzędzia, za pomocą których rozwijane jest oprogramowanie. Jest to spowodowane wypływem na proces tworzenia kodu i są jednocześnie ograniczane przez inne narzędzia w ekosystemie.
 
 \subsubsection{Środowisko do edycji kodu źródłowego}
 

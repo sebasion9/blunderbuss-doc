@@ -6,7 +6,7 @@ Istotnym etapem realizacji projektu są weryfikacja i walidacja, które mają na
 
 Testowanie kompilatora zostało zrealizowane z wykorzystaniem testów jednostkowych, przy użyciu standardowego mechanizmu testowania dostępnego w języku \verb|Go|. Struktura testów wygląda następująco: dla pakietu implementowanego kompilatora (np. pakiet \verb|semantics.go|) należy utworzyć osobny plik \verb|semantics_test.go|.
 
-Za pomocą testów jednostkowych przetestowano wszystkie wizyty reguł parsera (wypisane w listingu \ref{lst:reguly-parsera}). Przykład wybranych testów znajduję się w listingu \ref{lst:tst-wizyty}.
+Za pomocą testów jednostkowych przetestowano wszystkie wizyty reguł parsera (wypisane w listingu \ref{lst:reguly-parsera}). Przykład wybranych testów znajduje się w listingu \ref{lst:tst-wizyty}.
 Natomiast listing \ref{lst:tst-wyniki} zawiera wyniki wybranych testów jednostkowych.
 
 \section{Wykryte i usunięte błędy}
@@ -72,7 +72,7 @@ func main() int {
 }
 \end{lstlisting}
 
-Pierwsze i drugie wyłowanie funkcji wykonują całe ciało funkcji, natomiast trzecie wywołanie odczytuję tylko wynik. Wyniki testu przedstawiają się następująco\footnote{Wyniki testu zostały zformatowane w celu zwiększenia czytelności}:
+Pierwsze i drugie wywołanie funkcji wykonują całe ciało funkcji, natomiast trzecie wywołanie odczytuję tylko wynik. Wyniki testu przedstawiają się następująco\footnote{Wyniki testu zostały zformatowane w celu zwiększenia czytelności}:
 
 \begin{lstlisting}[caption={Wyniki testu memoizacji}]
 efekty uboczne
