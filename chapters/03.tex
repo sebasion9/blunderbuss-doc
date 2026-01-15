@@ -51,8 +51,7 @@ Programista musi mieć możliwość korzystania z kilku podstawowych typów:
 \end{itemize}
 \subsection{Możliwość dołączania zewnętrznych bibliotek C}
 
-Programista musi mieć możliwość dołączania zewnętrznych bibliotek C, na przykład glibc, biblioteki matematyczne lub biblioteki graficzne. Dołączanie bibliotek otwiera wiele możliwych ścieżek i znacznie ułatwia korzystanie z języka używając funkcji takich jak \verb|malloc| lub \verb|printf|. 
-
+Programista musi mieć możliwość dołączania zewnętrznych bibliotek C, na przykład bibliotek matematycznych, bibliotek graficznych lub konkretnie glibc. Dołączanie bibliotek otwiera wiele możliwych ścieżek i znacznie ułatwia korzystanie z języka używając funkcji takich jak \verb|malloc| lub \verb|printf|. 
 
 \section{Wymagania niefunkcjonalne}
 
@@ -117,7 +116,7 @@ Język Go (zwany też Golang) to nowoczesny, kompilowany język opracowany przez
 
 \subsubsection{C}
 
-Język C \cite{bib:c} jest językiem programowania niskiego poziomu, który łączy wydajność charakterystyczną dla assemblera z czytelnością języków wysokiego poziomu. Jest szeroko stosowany do tworzenia systemów operacyjnych, kompilatorów oraz oprogramowania wymagającego bezpośredniego dostępu do sprzętu, a jego składnia stała się fundamentem dla wielu współczesnych języków programowania.
+Język C \cite{bib:c} jest językiem programowania niskiego poziomu, który łączy wydajność charakterystyczną dla asemblera z czytelnością języków wysokiego poziomu. Jest szeroko stosowany do tworzenia systemów operacyjnych, kompilatorów oraz oprogramowania wymagającego bezpośredniego dostępu do sprzętu, a jego składnia stała się fundamentem dla wielu współczesnych języków programowania.
 
 W kontekście projektu, z powodu ograniczeń kompilatora i języka programowania, język C jest wykorzystywany jako narzędzie pomocnicze. Przykładem użycia jest funkcja pomocnicza konstruktora struktury reprezentującej kolor RGB (red, green, blue). Struktura ta jest potrzebna np. w bibliotece graficznej \verb|raylib|.
 
@@ -135,9 +134,9 @@ NASM (Netwide Assembler) to dostępny na licencji open-source asembler i disasem
 
 \subsubsection{GCC} % asm -> bin, preprocesor
 
-GCC (GNU Compiler Collection) \cite{bib:gcc} to dostępny na licencji open-source zestaw kompilatorów dla różnych języków programowania, w tym C, C++. Kompilator ten oprócz kompilowania języków, jest w stanie konsolidować (ang \textit{linkować}) w celu utworzenia końcowego programu. GCC charakteryzuje się wysoką wydajnością, wsparciem dla standardów językowych oraz optymalizacjami kodu.
+GCC (GNU Compiler Collection) \cite{bib:gcc} to dostępny na licencji open-source zestaw kompilatorów dla różnych języków programowania, w tym C, C++. Kompilator ten oprócz kompilowania języków jest w stanie konsolidować (ang. \textit{linkować}) w celu utworzenia końcowego programu. GCC charakteryzuje się wysoką wydajnością, wsparciem dla standardów językowych oraz optymalizacjami kodu.
 
-GCC to kluczowe narzędzie, niezbędne do przepływu kompilacji implementowanego języka programowania. W kontekście projektu odpowiedzialny jest za preprocesowanie kodu źródłowego a następnie linkowanie z biblioteką standardową oraz glibc.
+GCC to kluczowe narzędzie, niezbędne w przepływie kompilacji implementowanego języka programowania. W kontekście projektu odpowiedzialny jest za preprocesowanie kodu źródłowego, a następnie konsolidacje z biblioteką standardową oraz glibc.
 
 \subsection{Metody eksperymentalne}
 
@@ -145,7 +144,7 @@ Podczas wstępnego prototypowania oraz rozwijania kompilatora, wykorzystywane by
 
 \subsubsection{ld}
 
-\verb|ld| jest standardowym linkerem w systemach Unix/Linux, który odpowiada za linkowanie plików obiektowych oraz bibliotek w końcowy program wykonywalny. W praktyce, korzystanie bezpośrednio z ld okazało się problematyczne, ponieważ wymagało ręcznego podawania wszystkich opcji linkowania oraz ścieżek do bibliotek. Alternatywą stało się GCC, które jest wygodniejsze i prostsze w użyciu.
+\verb|ld| jest standardowym konsolidatorem w systemach Unix/Linux, który odpowiada za konsolidację plików obiektowych oraz bibliotek w końcowy program wykonywalny. W praktyce, korzystanie bezpośrednio z ld okazało się problematyczne, ponieważ wymagało ręcznego podawania wszystkich opcji konsolidacji oraz ścieżek do bibliotek. Alternatywą stało się GCC, które jest wygodniejsze i prostsze w użyciu.
 
 \subsection{Narzędzia do rozwoju oprogramowania}
 
@@ -153,7 +152,7 @@ Istotnym elementem implementacji, są narzędzia, za pomocą których rozwijane 
 
 \subsubsection{Środowisko do edycji kodu źródłowego}
 
-Środowisko do edycji kodu źródłowego projektu opierało się na kilku standardowych narzędziach dostępnych w systemie Linux. Sam system stał się głównym narzędziem pracy, narzuconym przez wymagania kompilacji na tej platformie, dzięki czemu jego użycie stało się naturalnym wyborem. Do edycji kodu źródłowego wykorzystano \verb|nvim| (odgałęzienie znanego oprogramowania \verb|vim|) posiadający szeroki ekosystem ułatwiający implementację. Przykładem dla języka Go jest LSP (Language Server Protocol): podpowiedzi składni, sprawdzanie błędów oraz nawigacja po definicjach i referencjach, a także debugger pozwalający sprawnie znajdywać i poprawiać błędy w kodzie źródłowym.
+Środowisko do edycji kodu źródłowego projektu opierało się na kilku standardowych narzędziach dostępnych w systemie Linux. Sam system stał się głównym narzędziem pracy, narzuconym przez wymagania kompilacji na tej platformie, dzięki czemu jego użycie stało się naturalnym wyborem. Do edycji kodu źródłowego wykorzystano \verb|nvim| (odgałęzienie znanego oprogramowania \verb|vim|) posiadający szeroki ekosystem ułatwiający implementację. Przykładem dla języka Go jest LSP (Language Server Protocol): podpowiedzi składni, sprawdzanie błędów oraz nawigacja po definicjach i referencjach, a także debugger pozwalający sprawnie znajdować i poprawiać błędy w kodzie źródłowym.
 
 \subsubsection{git}
 

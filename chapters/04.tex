@@ -20,11 +20,11 @@ Poniższe oprogramowanie jest wymagane do prawidłowej instalacji i działania k
     \item NASM w wersji 3.01 - warto zwrócić uwagę na wersję przy instalacji tego narzędzia za pomocą menadżera pakietów.
     \item Pakiet build-essentials
     \item GCC w wersji 15.2.1
-    \item Go w wersji 1.12.5 - w przypadku budowania kompilatora ze źródła, alternatywą jest pobranie wersji skompilowanej z wydania repozytorium.
+    \item Go w wersji 1.12.5 - w przypadku budowania kompilatora ze źródła. Alternatywnym rozwiązaniem jest pobranie wersji skompilowanej z wydania repozytorium.
     \item Git
 \end{itemize}
 
-Zaleźnie od dystrybucji systemu Linux, narzędzia te można zainstalować za pomocą menadżera pakietów odpowiednio dla każdej dystrybucji, takich jak \verb|apt|, \verb|pacman| czy \verb|dnf|. W przypadku gdy wersja oprogramowania zainstalowanego za pomocą menadżera pakietów się nie zgadza lub jest za niska, zalecanym jest zainstalowanie w oprogramowania w odpowiedniej wersji z innych źródeł.
+Zależnie od dystrybucji systemu Linux, narzędzia te można zainstalować za pomocą menadżera pakietów odpowiednio dla każdej dystrybucji, takich jak: \verb|apt|, \verb|pacman| czy \verb|dnf|. W przypadku gdy wersja oprogramowania zainstalowanego za pomocą menadżera pakietów się nie zgadza lub jest za niska, zalecanym jest zainstalowanie w oprogramowania w odpowiedniej wersji z innych źródeł.
 
 \section{Instalacja}
 \label{ch:04-instalacja}
@@ -61,7 +61,7 @@ install -m 0755 target/bbuss.bin "$PREFIX/bin/"
 install -m 0644 target/libstd.a "$PREFIX/lib"
 cp bbuss/lib/* "$PREFIX/include/bbuss"
 \end{lstlisting}
-    \item Ostatnim krokiem jest wyeksportowanie zmiennej środowiskowej "PATH", aby utrwalić zmienną, zaleca się umieszczenie poniższego polecenia w pliku konfiguracyjnym powłoki (np. \verb|~/.bashrc| lub \verb|~/.zshrc|).
+    \item Ostatnim krokiem jest wyeksportowanie zmiennej środowiskowej "PATH". W celu utrwalenia zmiennej, zaleca się umieszczenie poniższego polecenia w pliku konfiguracyjnym powłoki (np. \verb|~/.bashrc| lub \verb|~/.zshrc|).
     \break\verb|export PATH=/opt/bbuss/bin:$PATH|
 \end{enumerate}
 
@@ -107,10 +107,10 @@ Katalog \verb|bbuss/examples| zawiera przykładowe kody źródłowe programów n
     \item Ostatnim etapem kompilacji jest wykorzystanie \verb|gcc| do konsolidacji plików zawierających kod maszynowy z bibliotekami.
     \break\verb|gcc -no-pie target/test.o -L/opt/bbuss/lib -lstd -o target/test|
         \begin{itemize}
-            \item \verb|-no-pie| to argument przekazywany linkerowi, który powoduje, że wynikowy program nie jest plikiem PIE, lecz tradycjnym plikiem binarnym o stałych adresach w pamięci. PIE (Position Independend Executable) to rodzaj pliku wykonywalnego, który może być załadowany w pamięci pod dowolnym adresem, dzięki temu system operacyjny może stosować mechanizmy bezpieczeństwa, zapobiegając np. atakom typu przepełnienie bufora (ang. \textit{buffer overflow}). 
+            \item \verb|-no-pie| to argument przekazywany konsolidatorowi, który powoduje, że wynikowy program nie jest plikiem PIE, lecz tradycjnym plikiem binarnym o stałych adresach w pamięci. PIE (Position Independend Executable) to rodzaj pliku wykonywalnego, który może być załadowany w pamięci pod dowolnym adresem, dzięki temu system operacyjny może stosować mechanizmy bezpieczeństwa, zapobiegając np. atakom typu przepełnienie bufora (ang. \textit{buffer overflow}). 
             \item Flaga \verb|-L| jest odpowiedzialna za dodanie katalogu \verb|/opt/bbuss/lib| do listy miejsc, w których linker szuka bibliotek.
-            \item \verb|-lstd| a dokładniej \verb|-l<nazwa>| przekazuję linkerowi nazwę biblioteki, którą ma dodatkowo złączyć (oprócz np. domyślnej glibc). Wzorzec szukanych bibliotek wygląda następująco \verb|lib<nazwa>.a| lub \verb|lib<nazwa>.so|. Zainstalowana standardowa biblioteka istnieje w katalogu pod nazwą \verb|libstd.a|.
-            \item Finalnie \verb|-o| wskazuję ścieżke wynikowego programu wykonywalnego.
+            \item \verb|-lstd| a dokładniej \verb|-l<nazwa>| przekazuje konsolidatorowi nazwę biblioteki, którą ma dodatkowo skonsolidować (oprócz np. domyślnej biblioteki glibc). Wzorzec szukanych bibliotek wygląda następująco \verb|lib<nazwa>.a| lub \verb|lib<nazwa>.so|. Zainstalowana standardowa biblioteka istnieje w katalogu pod nazwą \verb|libstd.a|.
+            \item Finalnie, argument \verb|-o| wskazuje ścieżkę wynikowego programu wykonywalnego.
         \end{itemize}
     \item Ostatnim krokiem jest uruchomienie programu wynikowego.
     \break\verb|./target/test|
@@ -122,13 +122,12 @@ Język programowania \verb|blunderbuss| jest wzorowany na języku C, dlatego te�
 
 \subsubsection{Pliki nagłówkowe}
 
-Pliki nagłówkowe zawierają deklaracje funkcji bibliotek C (w tym np. glibc) lub biblioteki języka blunderbuss. Funkcje deklarowane są za pomocą słowa kluczowego \verb|extern|, poniżej przykładowe deklaracje.
+Pliki nagłówkowe zawierają deklaracje funkcji bibliotek C (w tym np. glibc) lub biblioteki języka blunderbuss. Funkcje deklarowane są za pomocą słowa kluczowego \verb|extern|. Poniżej przedstawiono przykładowe deklaracje.
 
 \begin{lstlisting}[caption={Deklaracje funkcji w pliku nagłówkowym}, label={lst:jp-header}, morekeywords={func, ptr, str}]
 extern func printf(str fmt, any msg) any {}
-extern func rand() int {}
 extern func malloc(int size) ptr {}
-extern func realloc(ptr p, int size) ptr {}
+extern func rand() int {}
 extern func free(ptr p) ptr {}
 extern func clock() ptr {}
 \end{lstlisting}
@@ -186,7 +185,7 @@ if(prod eq 11) {
 
 \subsubsection{Instrukcja pętli}
 
-Instrukcja pętli rozpoczyna się słowem kluczowym \verb|for| i składa się z: instrukcji inicjalizującej, wyrażenia warunkowego określającego zakończenie pętli, instrukcji wykonywanej po każdej iteracji oraz ciała pętli (bloku instrukcji). Dodatkowo programista może skorzystać z słów kluczowych \verb|next| i \verb|break|, które kolejno powodują natychmiastowe przejście do kolejnej iteracji lub wyjście z pętli.
+Instrukcja pętli rozpoczyna się słowem kluczowym \verb|for| i składa się z: instrukcji inicjalizującej, wyrażenia warunkowego określającego zakończenie pętli, instrukcji wykonywanej po każdej iteracji oraz ciała pętli (bloku instrukcji). Dodatkowo programista może skorzystać ze słów kluczowych \verb|next| i \verb|break|, które kolejno powodują natychmiastowe przejście do kolejnej iteracji lub wyjście z pętli.
 
 Przykładowa pętla \verb|for|.
 \begin{lstlisting}[caption={Instrukcja pętli}, label={lst:jp-for}, morekeywords={next, eq, lt, elseif}]
@@ -310,7 +309,7 @@ func main() int {
 \end{lstlisting}
 
 \newpage
-Przykład biblioteki \verb|raylib| zawarty w listingu \ref{lst:jp-przyklad2} korzysta z małego zestawu funkcji, celem narysowania okna i wypisania tekstu. Oprócz tego korzysta z zdefiniowanych symboli, za pomocą dyrektywy \verb|#define|, która jest preprocesorowana przez \verb|GCC|. Poniżej przedstawiono wynik programu w postaci narysowanego okna.
+Przykład biblioteki \verb|raylib| zawarty w listingu \ref{lst:jp-przyklad2} korzysta z małego zestawu funkcji w celu narysowania okna i wypisania tekstu. Oprócz tego korzysta z zdefiniowanych symboli, za pomocą dyrektywy \verb|#define|, która jest preprocesorowana przez \verb|GCC|. Poniżej przedstawiono wynik programu w postaci narysowanego okna.
 
 \begin{figure}[h]
     \centering
@@ -321,12 +320,11 @@ Przykład biblioteki \verb|raylib| zawarty w listingu \ref{lst:jp-przyklad2} kor
 
 \subsubsection{ncurses}
 
-ncurses to biblioteka dla języka C, która umożliwia tworzenie tekstowych interfejsów użytkownika (TUI ang. \textit{text user interface}) w terminalu, obsługując okna, kolory, klawiaturę i mysz. Dzięki tej bibliotece można tworzyć animację, bardziej zaawansowane interfejsy, panele czy menu.
+ncurses to biblioteka dla języka C, która umożliwia tworzenie tekstowych interfejsów użytkownika (TUI ang. \textit{text user interface}) w terminalu, obsługując: okna, kolory, klawiaturę i mysz. Dzięki tej bibliotece można tworzyć animację, bardziej zaawansowane interfejsy, panele czy menu.
 
 Kod zawarty w listingu \ref{lst:jp-przyklad-nc} to animacja wypisanego w terminalu słowa "hello" odbijającego się od krawędzi.\footnote{W przypadku braku animacji, rekomendowanym jest skorzystanie z programów posiadających wsparcie JavaScript, np. Adobe Acrobat Reader lub KDE Okular. W innym przypadku GIF z przykładem jest udostępniony jako załącznik do pracy.}
 
-
-\begin{figure}%[h]
+\begin{figure}[h]
     \centering
     % \includemovie{1cm}{1cm}{graf/przyklad-3-wynik.gif}
     \animategraphics[loop,autoplay,width=0.6\textwidth]{12}{graf/przyklad-3-wynik-}{0}{94}

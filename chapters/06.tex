@@ -7,17 +7,16 @@ Istotnym etapem realizacji projektu są weryfikacja i walidacja, które mają na
 Testowanie kompilatora zostało zrealizowane z wykorzystaniem testów jednostkowych, przy użyciu standardowego mechanizmu testowania dostępnego w języku \verb|Go|. Struktura testów wygląda następująco: dla pakietu implementowanego kompilatora (np. pakiet \verb|semantics.go|) należy utworzyć osobny plik \verb|semantics_test.go|.
 
 Za pomocą testów jednostkowych przetestowano wszystkie wizyty reguł parsera (wypisane w listingu \ref{lst:reguly-parsera}). Przykład wybranych testów znajduję się w listingu \ref{lst:tst-wizyty}.
-
-Listing \ref{lst:tst-wyniki} zawiera wyniki wybranych testów jednostkowych.
+Natomiast listing \ref{lst:tst-wyniki} zawiera wyniki wybranych testów jednostkowych.
 
 \section{Wykryte i usunięte błędy}
 
 Podczas implementacji kompilatora napotkano parę błędów, co jest naturalnym zjawiskiem podczas projektu o takim poziomie trudności. Do wykrytych i usuniętych błędów można zaliczyć:
 
 \begin{itemize}
-    \item Zapisywanie łańcucha znaków w pamięci podczas memoizacji.
-    \item Kolejność wykonywania gałęzi \verb|elseif|.
-    \item Brak wyrównania stosu oraz poprawnych ramek stosu. W początkowej fazie implementacji, a dokładniej w czasie prototypowania, stos nie był wyrównywany do 16 bajtów, co powodowało w niespodziewanych momentach błąd pamięci.
+    \item Błędne zapisywanie łańcucha znaków w pamięci podczas memoizacji.
+    \item Błędna kolejność wykonywania gałęzi \verb|elseif|.
+    \item Brak wyrównania stosu oraz błędne obsługiwanie ramek stosu. W początkowej fazie implementacji, a dokładniej w czasie prototypowania, stos nie był wyrównywany do 16 bajtów, co powodowało w niespodziewanych momentach błąd pamięci.
     \item Błędne korzystanie z ulotnych oraz nieulotnych rejestrów w kodzie asemblera skutkowało błędami pamięci.
 
 \end{itemize}
@@ -54,6 +53,7 @@ func main() int {
     end = clock();
     int elapsed2 = (end - start)/CLOCKS_PER_SEC;
 
+
     start = clock();
     int t3 = test(999999999);
     end = clock();
@@ -62,7 +62,7 @@ func main() int {
     PrintlnStr(Concat("pierwsze wywolanie: ", Itoa(t1)));
     PrintlnStr(Concat("czas wykonania: ", Itoa(elapsed1)));
 
-    PrintlnStr(Concat("drugie wywolanie (z safe): ", Itoa(t2)));
+    PrintlnStr(Concat("drugie wywolanie (safe): ", Itoa(t2)));
     PrintlnStr(Concat("czas wykonania: ", Itoa(elapsed2)));
 
     PrintlnStr(Concat("trzecie wywolanie (cache): ", Itoa(t3)));

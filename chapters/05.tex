@@ -5,7 +5,7 @@ Specyfikacja wewnętrzna zawiera informację o architekturze projektu, kodzie or
 
 \section{Architektura kompilatora}
 
-Architektura kompilatora jest podzielona na dwie głowne części: część przednia (dalej ang. \textit{frontend}) i część tylną (dalej ang. \textit{backend}). Frontend odpowiada za analizę kodu źródłowego i jego poprawność semantyczną i składa się z leksera (analiza leksykalna), parsera (analiza składniowa) oraz analizy semantycznej., natomiast backend zajmuje się generacją kodu asemblerowego.
+Architektura kompilatora jest podzielona na dwie głowne części: część przednia (dalej ang. \textit{frontend}) i część tylną (dalej ang. \textit{backend}). Frontend odpowiada za analizę kodu źródłowego i jego poprawność semantyczną i składa się z leksera (analiza leksykalna), parsera (analiza składniowa) oraz analizy semantycznej. Natomiast backend zajmuje się generacją kodu asemblerowego.
 
 \begin{figure}[h]
     \centering
@@ -77,7 +77,7 @@ BLOCK_COMMENT: '/' '*' .*? '*' '/' -> skip ;
 
 \subsubsection{Reguły parsera}
 
-Następnie analizowane są reguły, zazwyczaj korzystają z reguł leksera. Ten etap może wygenerować drzewo składniowe (AST).
+Następnie analizowane są reguły parsera, które korzystają z reguł leksera. Ten etap generuje drzewo składniowe (AST).
 
 \begin{itemize}
     \item \textbf{program} - punktem wejściowym jest reguła parsera \textbf{program}.
@@ -168,23 +168,22 @@ Zawarty w listingu \ref{lst:lp-go} kod, w linii 4, tworzy strumień tokenów za
 
 \section{Organizacja kodu}
 
-Język \verb|Go| nie jest docelowo językiem obiektowym, natomiast można za jego pomocą wykorzystywać niektóre schematy programowania obiektowego. Poniżej przedstawiono diagram klas kompilatora.
-
+Język \verb|Go| nie jest docelowo językiem obiektowym, natomiast można za jego pomocą wykorzystywać niektóre schematy programowania obiektowego.
 
 \newpage
 \subsection{Kontekst programu}
 
-Kod kontekstu programu zawiera metody utrzymywania i tworzenia zakresów (ang. \textit{scope}) bloków programu. Dodatkowo kod zawiera struktury różnych typów zmiennych oraz funkcje pomocnicze odpowiadające za generowanie etykiet w odpowiednich miejsach w programie.
+Kod kontekstu programu zawiera metody utrzymywania i tworzenia zakresów (ang. \textit{scope}) bloków programu. Dodatkowo kod zawiera struktury różnych typów zmiennych oraz funkcje pomocnicze odpowiadające za generowanie etykiet w odpowiednich miejscach w programie.
 
-Zawarte w listingu \ref{lst:ok-kontekst} struktury \verb|CompilerConetxt| oraz \verb|ScopeTree| odpowiadają za utrzymanie zakresów zmiennych (i również funkcji) programu. \verb|ScopeTree| jest strukturą danych typu drzewo. Natomiast struktury \verb|ScopeFunc|, \verb|ScopeFuncArg| oraz \verb|ScopeVar| implementują interfejs \verb|ScopeItf| i są odpowiedzialne za reprezentowanie zmiennych w drzewach zakresów.
+Zawarte w listingu \ref{lst:ok-kontekst} struktury \verb|CompilerConetxt| oraz \verb|ScopeTree| odpowiadają za utrzymanie zakresów zmiennych (i również funkcji) programu. \verb|ScopeTree| jest strukturą danych typu drzewo, natomiast struktury \verb|ScopeFunc|, \verb|ScopeFuncArg| oraz \verb|ScopeVar| implementują interfejs \verb|ScopeItf| i są odpowiedzialne za reprezentowanie zmiennych w drzewie zakresów.
 
 Zdefiniowane metody w listingu \ref{lst:ok-wybrane} to rekurencyjne funkcje pomagające odnaleźć się w odpowiednim miejscu drzewa zakresów. Dodatkowo opisano metody pomagające nazywać blocki i funkcje.
 \begin{itemize}
     \item \verb|GetScopeByName| - rekurencyjnie wyszukuje nazwy zakresu schodząc w dół drzewa.
-    \item \verb|SearchIdUp| - wyszukuje rekurencyjnie identyfikatora w góre po nazwie identyfikatora. Metoda używana do znajdowania odpowiedniego zakresu zawierającego identyfikator, wymagane do sprawdzania poprzednio zainicjalizowanych zmiennych.
+    \item \verb|SearchIdUp| - wyszukuje rekurencyjnie identyfikatora w góre po nazwie identyfikatora. Metoda używana do znajdowania odpowiedniego zakresu zawierającego identyfikator, wymagana do sprawdzania poprzednio zainicjalizowanych zmiennych.
     \item \verb|GetWhatFunc| - odpowiada zakresem aktualnej funkcji, w której jest wywoływana metoda.
     \item \verb|GetWhatFor| - zwraca zakres bloku najbliższego bloku \verb|for|, idąc w góre drzewa.
-    \item \verb|BlockScopeName| - generuje przedrostek bloku na podstawie nazwy (np. instrukcji \verb|for| lub \verb|if|.
+    \item \verb|BlockScopeName| - generuje przedrostek bloku na podstawie nazwy (np. instrukcji \verb|for| lub \verb|if|).
     \item \verb|EndFnLabel| - metoda pomocnicza generująca etykiete końca funkcji.
 \end{itemize}
 
@@ -194,11 +193,11 @@ Analiza semantyczna odbywa się w pliku źródłowym projektu \verb|semantics.go
 
 Odpowiednie metody zawarte w listingu \ref{lst:ok-visit} odzwierciedlają reguły parsera zdefiniowane w gramatykach formalnych (listing \ref{lst:reguly-parsera}).
 
-Wybrana metoda zawarta w listingu \ref{lst:ok-wybrane-wizytor} zawiera "wizyte" reguły parsera \verb|for_stmt| (zdefiniowanej w \ref{lst:reguly-parsera}). Ta metoda odpowiada za przygotowanie listy instrukcji wymaganej dla pętli \verb|for| oraz przygotowywuję etykiety potrzebne do prawidłowej kontroli przepływu programu. W ciele funkcji tworzony jest nowy zakres zmiennych oraz oddelegowywane są wizyty do reguł parsera \verb|stmt|, \verb|block| czy \verb|expr|.
+Wybrana metoda zawarta w listingu \ref{lst:ok-wybrane-wizytor} zawiera "wizytę" reguły parsera \verb|for_stmt| (zdefiniowanej w \ref{lst:reguly-parsera}). Ta metoda odpowiada za przygotowanie listy instrukcji wymaganej dla pętli \verb|for| oraz przygotowywuje etykiety potrzebne do prawidłowej kontroli przepływu programu. W ciele funkcji tworzony jest nowy zakres zmiennych oraz oddelegowywane są wizyty do reguł parsera \verb|stmt|, \verb|block| czy \verb|expr|.
 
 \subsection{Generacja kodu asemblerowego}
 
-Na etapie analizy semantycznej zbierane są etykiety oraz instrukcję, które są przechowywane w strukturze \verb|Codegen| jako lista typu \verb|Instruction| (definicja zawarta w listingu \ref{lst:gen-struktury}).
+Na etapie analizy semantycznej zbierane są etykiety oraz instrukcje, które są przechowywane w strukturze \verb|Codegen| jako lista typu \verb|Instruction| (definicja zawarta w listingu \ref{lst:gen-struktury}).
 
 Na podstawie list instrukcji; \verb|global|, \verb|text| oraz \verb|data| generowany jest kod asemblerowy w postaci ciągu znaków. W kolejnych etapach w przypadku braku błędów, kod ten wypisywany jest do pliku wyjściowego.
 
@@ -216,12 +215,12 @@ W celu sprawnego używania kompilatora, zaimplementowany został interfejs wiers
 Błędy w kontekście projektu dzielone są na dwie kategorie: parsera i kompilatora. Idiomatyczne podejście do błędów owocują w sprawniejszym testowaniu oraz czytelniejszym zwrotem informacji dla użytkownika.
 \subsubsection{Błędy parsera}
 
-W celu zdefiniowania niestandardowego słuchacza (dalej ang. \textit{listener}) błędów, wymaganym jest usunięcie domyślnego listenera parsera dostarczanego przez narzędzie ANTLR. Podmiana listenerów oraz definicja znajdują się w listingu \ref{lst:err-parser}, gdzie błędy niepoprawnej składni są zbierane. W przypadku jakichkolwiek błędów, program się zatrzymuje oraz informuję użytkownika szczegółowym opisem błędu oraz jego lokalizacją w pliku tekstowym.
+W celu zdefiniowania niestandardowego słuchacza (dalej ang. \textit{listener}) błędów, wymaganym jest usunięcie domyślnego listenera parsera dostarczanego przez narzędzie ANTLR. Podmiana listenerów oraz definicja znajdują się w listingu \ref{lst:err-parser}, gdzie zbierane są błędy nieprawidłowej składni. W przypadku jakichkolwiek błędów, program się zatrzymuje oraz informuje użytkownika szczegółowym opisem oraz lokalizacją błędów w pliku źródłowym.
 
 \newpage
 \subsubsection{Błędy kompilatora}
 
-Błędy kompilatora zabierane są podczas analizy semantycznej i tak jak w przypadku błędów parsera, zatrzymują dalsze etapy programu oraz wypisują na standardowe wyjście znalezione błędy. W listingu \ref{lst:err-compiler} można znaleźć definicje błędów:
+Błędy kompilatora zbierane są podczas analizy semantycznej i tak jak w przypadku błędów parsera, zatrzymują dalsze etapy programu oraz wypisują na standardowe wyjście znalezione błędy. W listingu \ref{lst:err-compiler} można znaleźć definicje błędów:
 
 \begin{itemize}
     \item \verb|UndefinedVariableError|
@@ -237,7 +236,7 @@ Standardowa biblioteka jest zaimplementowana w języku \verb|Go| oraz jest kompi
 
 \subsubsection{Memoizacja}
 
-Istnieją dwie wewnętrzne funkcje odpowiedzialne za memoizację: \verb|____SetM| oraz \verb|____GetM|. Ich definicja znajduję się w listingu \ref{lst:sb-mem}, gdzie za pomocą przekształceń typów z języka C na Go, zapisywane i odczytywane są wyniki funkcji. Kluczem mapy jest wynik funkcji haszującej\footnote{Funkcja haszująca jest deterministycznym algorytmem, który przekształca dane o dowolnej długości w hash, stosowany m.in. do porównywania danych, indeksowania oraz zapewniania integralności informacji.}, a wartością jest zwracany wynik funkcji. Na wejście funkcji haszującej wchodzi nazwa funkcji oraz wartości jej argumentów wywołania.
+Istnieją dwie wewnętrzne funkcje odpowiedzialne za memoizację: \verb|____SetM| oraz \verb|____GetM|. Ich definicja znajduję się w listingu \ref{lst:sb-mem}, gdzie za pomocą przekształceń typów z języka C na Go, zapisywane i odczytywane są wyniki funkcji. Kluczem mapy jest wynik funkcji haszującej\footnote{Funkcja haszująca jest deterministycznym algorytmem, który przekształca dane o dowolnej długości w hash, stosowany m.in. do porównywania danych, indeksowania oraz zapewniania integralności informacji.}, a wartością jest zwracany wynik funkcji. Na wejście funkcji haszującej wchodzi nazwa funkcji oraz wartości argumentów jej wywołania.
 
 \subsubsection{Inne definicje}
 
